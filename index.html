@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QuimicaQuest Móvil</title>
+    <style>
+        :root {
+            --bg-color: #1a1b26; --panel-bg: #24283b; --text-color: #c0caf5;
+            --metal: #3d59a1; --nonmetal: #9ece6a; --metalloid: #e0af68; --noble: #bb9af7;
+            --correct: #73daca; --error: #f7768e;
+            --proton-color: #f7768e; --neutron-color: #737c9c; --electron-color: #7dcfff;
+            --stable: #9ece6a; --radioactive: #e0af68; --unstable: #f7768e;
+            --warning: #ff9e64;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color); color: var(--text-color);
+            margin: 0; padding: 15px;
+            display: flex; flex-direction: column; align-items: center;
+            touch-action: manipulation; /* Mejora respuesta táctil */
+        }
+
+        header { text-align: center; width: 100%; max-width: 1200px; margin-bottom: 15px; }
+        h1 { margin: 0 0 10px 0; color: #7aa2f7; font-size: 1.8rem; }
+        #subtitle { margin: 0 0 15px 0; font-size: 1rem; opacity: 0.8; }
+        
+        .controls { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; width: 100%; }
+        .controls button {
+            background-color: #7aa2f7; color: #1a1b26; border: none; padding: 12px 15px;
+            border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1rem;
+            transition: 0.2s; flex: 1 1 auto; /* Botones flexibles */
+            min-width: 120px; max-width: 200px;
+        }
+        .controls button:active { transform: scale(0.96); }
+        button.btn-special { background-color: #e0af68; }
+
+        /* --- PANEL DE MISIONES --- */
+        #mission-panel { display: none; width: 100%; max-width: 800px; background: #1a1b26; border: 2px solid var(--correct); padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .mission-title { color: var(--correct); font-size: 1.1rem; margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 1px; }
+        .mission-text { font-size: 1.3rem; font-weight: bold; margin: 0 0 15px 0; line-height: 1.3; }
+        
+        .mission-stats { display: flex; justify-content: space-around; align-items: center; background: var(--panel-bg); padding: 10px; border-radius: 8px; font-weight: bold;}
+        .time-alert { color: var(--error) !important; animation: pulse 0.8s infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } }
+        #hint-text { display: none; color: var(--electron-color); font-style: italic; margin-top: 15px; background: rgba(125, 207, 255, 0.1); padding: 12px; border-radius: 8px; font-size: 0.95rem;}
+
+        /* --- LAYOUT PRINCIPAL (Escritorio por defecto) --- */
+        #builder-section { display: flex; width: 100%; max-width: 1400px; gap: 20px; justify-content: center; align-items: flex-start; }
+        .builder-controls, .builder-data { background: var(--panel-bg); padding: 20px; border-radius: 12px; flex: 1; min-width: 280px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .builder-canvas-container { flex: 2; min-width: 350px; display: flex; flex-direction: column; gap: 10px;}
+        .canvas-box { background: #14151f; border-radius: 16px; position: relative; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 500px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); border: 1px solid #3b4261; }
+
+        /* --- CONTROLES DE PARTÍCULAS (Optimizado Móvil) --- */
+        .particle-control { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: #1a1b26; padding: 8px 12px; border-radius: 10px; }
+        .particle-label strong { font-size: 1.1rem; display: block; }
+        .particle-label small { opacity: 0.7; font-size: 0.85rem; }
+        
+        .counter-wrapper { display: flex; align-items: center; gap: 5px; }
+        /* Botones grandes para pulgares */
+        .btn-hold {
+            padding: 10px 0; width: 50px; height: 50px; /* Cuadrados grandes */
+            font-size: 1.8rem; font-weight: bold;
+            background: #414868; color: white; border: none; border-radius: 10px;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; user-select: none; -webkit-user-select: none;
+            transition: background 0.1s, transform 0.1s;
+        }
+        .btn-hold:active { background: #565f89; transform: scale(0.95); }
+        .count-display { font-weight: bold; font-size: 1.5rem; min-width: 45px; text-align: center; }
+
+        .mass-display { background: #1a1b26; padding: 12px; border-radius: 10px; text-align: center; margin-bottom: 20px; font-weight: bold; border: 2px dashed var(--neutron-color); color: var(--neutron-color); }
+
+        button.neutral-btn { width:100%; margin-top:10px; background:#414868; color: var(--text-color); padding: 15px; font-size: 1rem; border:none; border-radius: 10px; font-weight: bold;}
+        button.neutral-btn:active { background: #565f89; }
+
+        /* --- VISUALIZACIÓN ÁTOMO --- */
+        .nucleus-container { position: absolute; z-index: 10; display: flex; justify-content: center; align-items: center; pointer-events: none; }
+        .nucleon { position: absolute; width: 18px; height: 18px; border-radius: 50%; box-shadow: inset -3px -3px 5px rgba(0,0,0,0.7), inset 2px 2px 3px rgba(255,255,255,0.5), 2px 2px 4px rgba(0,0,0,0.4); }
+        .nucleon.p { background: radial-gradient(circle at 30% 30%, #ffc7d4 0%, var(--proton-color) 50%, #9e2a43 100%); }
+        .nucleon.n { background: radial-gradient(circle at 30% 30%, #d0d6e8 0%, var(--neutron-color) 50%, #3a405a 100%); }
+
+        @keyframes vibrate-mild { 0% {transform: translate(0.5px, 0.5px)} 50% {transform: translate(-0.5px, -0.5px)} 100% {transform: translate(0.5px, 0.5px)} }
+        @keyframes vibrate-strong { 0% {transform: translate(1.5px, 1.5px)} 50% {transform: translate(-1.5px, -1.5px)} 100% {transform: translate(1.5px, 1.5px)} }
+        .vibrate-mild { animation: vibrate-mild 0.1s linear infinite; }
+        .vibrate-strong { animation: vibrate-strong 0.06s linear infinite; }
+
+        .shell { position: absolute; border: 2px solid rgba(125, 207, 255, 0.2); border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 5; pointer-events: none;}
+        .electron { position: absolute; width: 12px; height: 12px; background: #fff; border-radius: 50%; box-shadow: 0 0 10px var(--electron-color), 0 0 4px #fff; transform: translate(-50%, -50%); z-index: 6; will-change: transform; }
+
+        /* --- DATOS --- */
+        .data-box { background: #1a1b26; padding: 15px; border-radius: 10px; margin-bottom: 10px; }
+        .big-sym { font-size: 3.5rem; font-weight: 800; line-height: 0.9; }
+        .isotope-numbers { font-size: 1.2rem; font-weight: 700; display: flex; flex-direction: column; line-height: 1.1; margin-right: 8px; text-align: right; color: var(--text-color); opacity: 0.8;}
+        .tag { padding: 6px 10px; border-radius: 6px; font-size: 0.9rem; font-weight: bold; display: inline-block; margin-top: 8px;}
+        .tag.stable { background: var(--stable); color: #1a1b26; }
+        .tag.radioactive { background: var(--radioactive); color: #1a1b26; }
+        .tag.unstable { background: var(--unstable); color: #1a1b26; }
+        .advice-text { color: var(--electron-color); font-size: 1rem; font-weight: 500; margin-top: 10px; display: block; line-height: 1.3;}
+
+        /* --- MODAL --- */
+        #modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; padding: 20px; }
+        .modal-content { background: var(--panel-bg); padding: 25px; border-radius: 16px; text-align: center; max-width: 450px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 2px solid #7aa2f7;}
+        .leaderboard-table { width: 100%; margin-top: 15px; border-collapse: collapse; }
+        .leaderboard-table th, .leaderboard-table td { padding: 10px; border-bottom: 1px solid #414868; text-align: center; font-size: 0.95rem;}
+        .leaderboard-table th { color: var(--noble); text-transform: uppercase; font-size: 0.85rem; }
+        .modal-btn { margin-top: 15px; width: 100%; padding: 12px; font-size: 1.1rem; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; background: #414868; color: var(--text-color); }
+
+        /* --- SECCIÓN ADIVINANZA --- */
+        #guess-panel { display: none; width: 100%; max-width: 900px; background: #1a1b26; border: 2px solid #ff9e64; padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .guess-title { color: #ff9e64; font-size: 1.1rem; margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 1px; }
+        .guess-clue { font-size: 1.3rem; font-weight: bold; margin: 10px 0 20px 0; line-height: 1.4; color: var(--electron-color); background: rgba(125,207,255,0.1); padding: 15px; border-radius: 10px; }
+        .guess-stats { display: flex; justify-content: space-around; align-items: center; background: var(--panel-bg); padding: 10px; border-radius: 8px; font-weight: bold; margin-bottom: 15px; }
+        .guess-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 15px; }
+        .guess-card {
+            background: var(--panel-bg); border: 2px solid #414868; border-radius: 12px; padding: 12px 8px;
+            cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            display: flex; flex-direction: column; align-items: center; gap: 4px; position: relative; overflow: hidden;
+        }
+        .guess-card:hover { transform: scale(1.12); box-shadow: 0 8px 25px rgba(122,162,247,0.3); border-color: #7aa2f7; z-index: 10; }
+        .guess-card .card-symbol { font-size: 2rem; font-weight: 800; color: #7aa2f7; }
+        .guess-card .card-name { font-size: 0.85rem; font-weight: 600; color: var(--text-color); }
+        .guess-card .card-z { font-size: 0.75rem; color: var(--proton-color); font-weight: bold; }
+        .guess-card .card-mini-atom { width: 60px; height: 60px; position: relative; margin: 4px 0; }
+        .guess-card .card-mini-atom .mini-nucleus { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+        .guess-card .card-mini-atom .mini-nucleon { position: absolute; width: 6px; height: 6px; border-radius: 50%; }
+        .guess-card .card-mini-atom .mini-nucleon.p { background: var(--proton-color); }
+        .guess-card .card-mini-atom .mini-nucleon.n { background: var(--neutron-color); }
+        .guess-card .card-mini-atom .mini-shell { position: absolute; border: 1px solid rgba(125,207,255,0.25); border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+        .guess-card .card-mini-atom .mini-electron { position: absolute; width: 4px; height: 4px; background: var(--electron-color); border-radius: 50%; box-shadow: 0 0 4px var(--electron-color); }
+        .guess-card.correct-flash { border-color: var(--correct); background: rgba(115,218,202,0.15); }
+        .guess-card.wrong-flash { border-color: var(--error); background: rgba(247,118,142,0.15); }
+
+        /* =========================================
+           OPTIMIZACIÓN PARA MÓVILES (MEDIA QUERY)
+        ========================================= */
+        @media (max-width: 900px) {
+            body { padding: 10px; }
+            h1 { font-size: 1.5rem; }
+            
+            /* Apilar los paneles verticalmente */
+            #builder-section { flex-direction: column; align-items: stretch; gap: 15px; }
+            
+            /* REORDENAR PARA MÓVIL: 1. Visor, 2. Controles, 3. Datos */
+            .builder-canvas-container { order: 1; }
+            .builder-controls { order: 2; }
+            .builder-data { order: 3; }
+
+            /* Ajustar anchos y alturas */
+            .builder-controls, .builder-data, .builder-canvas-container { min-width: 100%; width: 100%; }
+            .canvas-box { height: 380px; /* Un poco más bajo en móvil */ }
+
+            /* Ajustes del panel de misiones */
+            .mission-stats { flex-wrap: wrap; gap: 10px; justify-content: center; }
+            .mission-stats > div { font-size: 1rem; }
+            /* Ajustes del panel de adivinanza */
+            .guess-options { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .guess-stats { flex-wrap: wrap; gap: 8px; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>QuimicaQuest Móvil</h1>
+        <p id="subtitle">Laboratorio Atómico de Bolsillo</p>
+        <div class="controls">
+            <button onclick="switchMode('builder')" class="btn-special">⚛️ Libre</button>
+            <button onclick="startPractice()" style="background-color: var(--metalloid); color: #1a1b26;">🛠️ Práctica</button>
+            <button onclick="startMissions()" style="background-color: var(--correct); color: #1a1b26;">🎯 Competir</button>
+            <button onclick="startGuessing()" style="background-color: #ff9e64; color: #1a1b26;">🔬 Adivinar</button>
+            <button onclick="showLeaderboard(false)" style="background-color: var(--noble); color: #1a1b26;">🏆 Récords</button>
+        </div>
+    </header>
+
+    <div id="mission-panel">
+        <h3 class="mission-title" id="mission-title-text">Misión</h3>
+        <p class="mission-text" id="mission-desc">-</p>
+        <div class="mission-stats">
+            <div>Prog: <span id="mission-tracker" style="color:var(--noble)">0/5</span></div>
+            <div id="score-container">Pts: <span id="score-display" style="color:var(--correct)">0</span></div>
+            <div id="time-container">⏱️ <span id="time-display" style="color:var(--warning)">60</span>s</div>
+            <button id="hint-btn" onclick="showHint()" style="display:none; background-color: var(--electron-color); color: #1a1b26; padding: 8px 12px; border:none; border-radius:6px; font-weight:bold; font-size:0.9rem;">💡 Pista</button>
+        </div>
+        <p id="hint-text"></p>
+    </div>
+
+    <div id="guess-panel">
+        <h3 class="guess-title" id="guess-title-text">Adivinanza Atómica</h3>
+        <div class="guess-stats">
+            <div>Misión: <span id="guess-tracker" style="color:var(--noble)">1/5</span></div>
+            <div>Pts: <span id="guess-score-display" style="color:var(--correct)">0</span></div>
+            <div>⏱️ <span id="guess-time-display" style="color:var(--warning)">40</span>s</div>
+        </div>
+        <div class="guess-clue" id="guess-clue-text">-</div>
+        <div class="guess-options" id="guess-options-container"></div>
+    </div>
+
+    <div id="builder-section">
+        <div class="builder-controls">
+            <h3 style="margin-top:0; color:var(--proton-color); text-align:center;">Configurar Núcleo</h3>
+            
+            <div class="particle-control" data-type="p">
+                <div class="particle-label"><strong style="color:var(--proton-color)">Protones (Z)</strong><small>Define Elemento</small></div>
+                <div class="counter-wrapper">
+                    <button class="btn-hold minus">-</button>
+                    <span id="p-count" class="count-display">1</span>
+                    <button class="btn-hold plus">+</button>
+                </div>
+            </div>
+
+            <div class="particle-control" data-type="n">
+                 <div class="particle-label"><strong style="color:var(--neutron-color)">Neutrones (N)</strong><small>Define Isótopo</small></div>
+                 <div class="counter-wrapper">
+                    <button class="btn-hold minus">-</button>
+                    <span id="n-count" class="count-display">0</span>
+                    <button class="btn-hold plus">+</button>
+                </div>
+            </div>
+            
+            <div class="mass-display">
+                Masa Total (A = Z + N): <span id="a-count-left" style="font-size: 1.4rem; margin-left:5px;">1</span>
+            </div>
+            
+            <h3 style="margin-top:20px; color:var(--electron-color); text-align:center;">Nube Electrónica</h3>
+             <div class="particle-control" data-type="e">
+                 <div class="particle-label"><strong style="color:var(--electron-color)">Electrones (e⁻)</strong><small>Define Carga</small></div>
+                 <div class="counter-wrapper">
+                    <button class="btn-hold minus">-</button>
+                    <span id="e-count" class="count-display">1</span>
+                    <button class="btn-hold plus">+</button>
+                </div>
+            </div>
+             <button class="neutral-btn" onclick="setNeutral()">⚡ Hacer Neutro (e⁻ = p⁺)</button>
+        </div>
+
+        <div class="builder-canvas-container">
+            <div class="canvas-box" id="atom-viewer"></div>
+        </div>
+
+        <div class="builder-data">
+            <div class="data-box" style="display:flex; align-items:center; justify-content:center; padding: 25px 10px;">
+                <div class="isotope-numbers">
+                    <span id="data-a" title="Número Másico (A)">1</span>
+                    <span id="data-z" title="Número Atómico (Z)">1</span>
+                </div>
+                <div class="big-sym" id="data-sym">H</div>
+                <div style="margin-left:20px;">
+                    <div id="data-name" style="font-weight:bold; font-size:1.3rem; line-height:1.2; margin-bottom:5px;">Hidrógeno-1</div>
+                     <span id="data-charge-tag" class="tag stable" style="background:#414868; color:white; font-size:1rem;">Carga: 0</span>
+                </div>
+            </div>
+
+            <div class="data-box">
+                <strong>Estado Nuclear:</strong><br>
+                <span id="stability-tag" class="tag stable" style="font-size:1rem; margin-top:8px;">Estable</span>
+                <span id="neutron-advice" class="advice-text">Núcleo estable.</span>
+            </div>
+
+             <div class="data-box">
+                <strong>Configuración Electrónica:</strong>
+                <div id="b-config" style="font-family: 'Courier New', monospace; color:var(--electron-color); margin-top:8px; font-size:1.2rem; font-weight:bold;">1s<sup>1</sup></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-overlay">
+        <div class="modal-content">
+            <h2 id="modal-title" style="color:var(--correct); margin-top:0; font-size:1.8rem;">¡Terminado!</h2>
+            <p id="modal-msg" style="display:none; font-size:1.2rem;">Puntos: <strong id="final-score" style="font-size:1.6rem; color:var(--correct);">0</strong></p>
+            
+            <div id="leaderboard-section">
+                <div style="display:flex; gap:8px; justify-content:center; margin-bottom:12px;">
+                    <button id="tab-competir" class="modal-btn" onclick="switchLeaderboardTab('competir')" style="margin-top:0;flex:1;padding:8px;font-size:0.85rem;background:var(--correct);color:#1a1b26;">Competir</button>
+                    <button id="tab-adivinar" class="modal-btn" onclick="switchLeaderboardTab('adivinar')" style="margin-top:0;flex:1;padding:8px;font-size:0.85rem;">Adivinar</button>
+                </div>
+                <h3 id="leaderboard-subtitle" style="color:var(--noble); margin-bottom:10px; font-size:1rem; letter-spacing:1px;">TOP 5 CIENTÍFICOS</h3>
+                <table class="leaderboard-table">
+                    <thead><tr><th>#</th><th>Nombre</th><th>Pts</th></tr></thead>
+                    <tbody id="leaderboard-body"></tbody>
+                </table>
+            </div>
+            
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="modal-btn" onclick="closeModal()" style="flex:1;">Cerrar</button>
+                <button id="replay-btn" class="modal-btn" onclick="closeModal();" style="background:var(--correct); color:#1a1b26; flex:1.5;"></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- GESTIÓN DE AUDIO ---
+        let audioCtx = null;
+        function initAudio() { if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } }
+        function playTone(freq, type, time, duration, vol = 0.1) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+            osc.type = type; osc.frequency.value = freq;
+            gain.gain.setValueAtTime(vol, audioCtx.currentTime + time); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + time + duration);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(audioCtx.currentTime + time); osc.stop(audioCtx.currentTime + time + duration);
+        }
+        const SoundManager = {
+            success: () => { initAudio(); playTone(523.25,'sine',0,0.15); playTone(659.25,'sine',0.15,0.15); playTone(783.99,'sine',0.3,0.3); },
+            victory: () => { initAudio(); playTone(523.25,'sine',0,0.15); playTone(659.25,'sine',0.15,0.15); playTone(783.99,'sine',0.3,0.15); playTone(1046.50,'sine',0.45,0.5); },
+            fail: () => { initAudio(); playTone(300,'triangle',0,0.2,0.2); playTone(250,'triangle',0.2,0.4,0.2); }
+        };
+
+        // --- DATOS ---
+        const elementsBasic = [null,["H","Hidrógeno"],["He","Helio"],["Li","Litio"],["Be","Berilio"],["B","Boro"],["C","Carbono"],["N","Nitrógeno"],["O","Oxígeno"],["F","Flúor"],["Ne","Neón"],["Na","Sodio"],["Mg","Magnesio"],["Al","Aluminio"],["Si","Silicio"],["P","Fósforo"],["S","Azufre"],["Cl","Cloro"],["Ar","Argón"],["K","Potasio"],["Ca","Calcio"]];
+        const isotopeDB = {
+            1:{0:["S"],1:["S"],2:["R"]}, 2:{1:["S"],2:["S"],4:["R"]}, 3:{3:["S"],4:["S"],5:["R"]},
+            4:{5:["S"],3:["R"],6:["R"]}, 5:{5:["S"],6:["S"]}, 6:{6:["S"],7:["S"],8:["R"],5:["R"]},
+            7:{7:["S"],8:["S"]}, 8:{8:["S"],9:["S"],10:["S"]}, 9:{10:["S"]}, 10:{10:["S"],11:["S"],12:["S"]},
+            11:{12:["S"]}, 12:{12:["S"],13:["S"],14:["S"]}, 13:{14:["S"]}, 14:{14:["S"],15:["S"],16:["S"]},
+            15:{16:["S"]}, 16:{16:["S"],17:["S"],18:["S"],20:["S"]}, 17:{18:["S"],20:["S"]},
+            18:{18:["S"],20:["S"],22:["S"]}, 19:{20:["S"],22:["S"]}, 20:{20:["S"],22:["S"],23:["S"],24:["S"],26:["S"]}
+        };
+        
+        // Misiones (Simplificadas para el ejemplo)
+        const allMissions = [
+            { text: "Crea Carbono-12 Neutro (6p, 6n, 6e).", target: { p: 6, n: 6, e: 6 } },
+            { text: "Crea Anión Óxido O-2 (Masa 16).", target: { p: 8, n: 8, e: 10 } },
+            { text: "Crea Tritio (H-3 Neutro).", target: { p: 1, n: 2, e: 1 } },
+            { text: "Crea Catión Litio Li+ (Masa 7).", target: { p: 3, n: 4, e: 2 } },
+            { text: "Crea una Partícula Alfa (Núcleo He-4).", target: { p: 2, n: 2, e: 0 } },
+             { text: "Construye un Anión Cloruro (Cl-) con masa 35.", target: { p: 17, n: 18, e: 18 } },
+            { text: "Crea un Catión de Calcio (Ca+2) con masa 40.", target: { p: 20, n: 20, e: 18 } },
+            { text: "Construye un gas noble: Neón-20 (Neutro).", target: { p: 10, n: 10, e: 10 } }
+        ];
+        const practiceMissions = [
+            { text: "Práctica: Crea Hidrógeno-1 neutro.", target: { p: 1, n: 0, e: 1 }, hint: "Z=1, A=1. Neutro significa p=e." },
+            { text: "Práctica: Haz un ión H+.", target: { p: 1, n: 0, e: 0 }, hint: "Carga +1 significa quitar 1 electrón." },
+            { text: "Práctica: Crea Deuterio (H-2 neutro).", target: { p: 1, n: 1, e: 1 }, hint: "Masa 2 = 1 protón + 1 neutrón." },
+            { text: "Práctica: Helio-4 neutro.", target: { p: 2, n: 2, e: 2 }, hint: "Z=2 (Helio). Masa 4 (2p+2n)." }
+        ];
+
+        // --- ESTADO GLOBAL ---
+        let b_p = 1, b_n = 0, b_e = 1;
+        let activeElectrons = [], animationTime = 0;
+        let gameMissions = [], currentMissionIndex = 0, score = 0, timeLeft = 60, timerInterval;
+        let currentMode = 'builder';
+        let pressTimer = null, isPressing = false; // Para lógica de mantener presionado
+        let guessTimerInterval, guessTimeLeft = 40, guessMissions = [], guessIndex = 0, guessScore = 0, guessLocked = false;
+        let activeLeaderboardTab = 'competir';
+
+        // --- INICIALIZACIÓN Y EVENTOS ---
+        document.addEventListener('click', () => initAudio(), { once: true });
+        document.addEventListener('touchstart', () => initAudio(), { once: true }); // Audio en móvil
+
+        // Lógica "Press & Hold" para botones
+        function attachHoldListeners() {
+            document.querySelectorAll('.particle-control').forEach(ctrl => {
+                const type = ctrl.dataset.type;
+                const minus = ctrl.querySelector('.minus');
+                const plus = ctrl.querySelector('.plus');
+                setupButton(minus, type, -1);
+                setupButton(plus, type, 1);
+            });
+        }
+
+        function setupButton(btn, type, delta) {
+            const start = (e) => {
+                if(e.cancelable) e.preventDefault(); // Evitar scroll/zoom al mantener
+                if(isPressing) return;
+                isPressing = true;
+                updateBuilder(type, delta); // Primer click inmediato
+                // Iniciar repetición tras una pausa
+                pressTimer = setTimeout(() => {
+                    pressTimer = setInterval(() => updateBuilder(type, delta), 90); // Velocidad de repetición
+                }, 300); // Pausa inicial
+            };
+            const stop = () => {
+                clearTimeout(pressTimer);
+                clearInterval(pressTimer);
+                isPressing = false; pressTimer = null;
+            };
+            
+            btn.addEventListener('mousedown', start);
+            btn.addEventListener('touchstart', start, {passive: false});
+            btn.addEventListener('mouseup', stop);
+            btn.addEventListener('mouseleave', stop);
+            btn.addEventListener('touchend', stop);
+            btn.addEventListener('touchcancel', stop);
+        }
+
+        // --- LÓGICA DEL JUEGO ---
+        function switchMode(mode) {
+            currentMode = mode; clearInterval(timerInterval); clearInterval(guessTimerInterval);
+            document.getElementById('mission-panel').style.display = 'none';
+            document.getElementById('guess-panel').style.display = 'none';
+            document.getElementById('builder-section').style.display = 'flex';
+        }
+
+        function startMissions() {
+            currentMode = 'timed'; score = 0; currentMissionIndex = 0;
+            clearInterval(guessTimerInterval);
+            document.getElementById('guess-panel').style.display = 'none';
+            document.getElementById('builder-section').style.display = 'flex';
+            gameMissions = [...allMissions].sort(()=>0.5-Math.random()).slice(0,5);
+            setupMissionUI("Misión Competitiva", true, false);
+            resetBuilder(); loadNextMission();
+        }
+
+        function startPractice() {
+            currentMode = 'practice'; currentMissionIndex = 0;
+            clearInterval(guessTimerInterval);
+            document.getElementById('guess-panel').style.display = 'none';
+            document.getElementById('builder-section').style.display = 'flex';
+            gameMissions = [...practiceMissions].sort(()=>0.5-Math.random()).slice(0,5);
+            setupMissionUI("Práctica Libre", false, true);
+            resetBuilder(); loadNextMission();
+        }
+
+        function setupMissionUI(title, showScoreTime, showHint) {
+            document.getElementById('mission-panel').style.display = 'block';
+            document.getElementById('mission-title-text').innerText = title;
+            document.getElementById('score-container').style.display = showScoreTime ? 'block' : 'none';
+            document.getElementById('time-container').style.display = showScoreTime ? 'block' : 'none';
+            document.getElementById('hint-btn').style.display = showHint ? 'block' : 'none';
+            document.getElementById('hint-text').style.display = 'none';
+            document.getElementById('score-display').innerText = score;
+        }
+
+        function resetBuilder() { b_p=1; b_n=0; b_e=1; updateBuilderUI(); }
+
+        function loadNextMission() {
+            document.getElementById('hint-text').style.display = 'none';
+            if(currentMissionIndex < gameMissions.length) {
+                document.getElementById('mission-desc').innerText = gameMissions[currentMissionIndex].text;
+                document.getElementById('mission-tracker').innerText = `${currentMissionIndex+1}/5`;
+                if(currentMode === 'timed') startTimer();
+            } else { endGame(true); }
+        }
+
+        function showHint() {
+            const h = document.getElementById('hint-text');
+            h.innerText = gameMissions[currentMissionIndex].hint; h.style.display = 'block';
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval); timeLeft=60; updateTimerUI();
+            timerInterval = setInterval(()=>{ timeLeft--; updateTimerUI(); if(timeLeft<=0){clearInterval(timerInterval); SoundManager.fail(); currentMissionIndex++; setTimeout(()=>loadNextMission(), 500);} }, 1000);
+        }
+        function updateTimerUI() {
+            const t = document.getElementById('time-display'); t.innerText=timeLeft;
+            t.classList.toggle('time-alert', timeLeft<=5);
+        }
+
+        function checkMission() {
+            if(currentMode==='builder' || currentMissionIndex>=gameMissions.length) return;
+            const t = gameMissions[currentMissionIndex].target;
+            if(b_p===t.p && b_n===t.n && b_e===t.e) {
+                clearInterval(timerInterval);
+                document.getElementById('mission-panel').style.borderColor = "#e0af68";
+                if(currentMode==='timed') { score += (100 + timeLeft*10); document.getElementById('score-display').innerText = score; }
+                (currentMissionIndex===gameMissions.length-1 ? SoundManager.victory : SoundManager.success)();
+                setTimeout(()=>{
+                    document.getElementById('mission-panel').style.borderColor = "var(--correct)";
+                    currentMissionIndex++; loadNextMission();
+                }, 500);
+            }
+        }
+
+        function endGame(won) {
+            clearInterval(timerInterval); const isTimed = currentMode==='timed'; currentMode='builder';
+            if(isTimed && !won) SoundManager.fail();
+            
+            const mt = document.getElementById('modal-title');
+            mt.innerText = won ? (isTimed?"¡Misiones Completadas!":"¡Práctica Terminada!") : "¡Tiempo Agotado!";
+            mt.style.color = won ? "var(--correct)" : "var(--error)";
+            
+            const mm = document.getElementById('modal-msg');
+            const ls = document.getElementById('leaderboard-section');
+            const rb = document.getElementById('replay-btn');
+            
+            if(isTimed) {
+                mm.style.display='block'; document.getElementById('final-score').innerText=score;
+                ls.style.display='block'; rb.innerText="Jugar de Nuevo"; rb.onclick=()=>{closeModal();startMissions();};
+                activeLeaderboardTab = 'competir';
+                saveScore(score);
+            } else {
+                mm.style.display='none'; ls.style.display='none';
+                rb.innerText="Practicar de Nuevo"; rb.onclick=()=>{closeModal();startPractice();};
+                showModal();
+            }
+        }
+
+        function saveScore(ns) {
+            if(ns<=0) return;
+            setTimeout(()=>{
+                let name = prompt("¡Récord! Tu nombre (max 10 letras):") || "Anónimo";
+                let scores = JSON.parse(localStorage.getItem('quimicaScores')||'[]');
+                scores.push({name:name.substring(0,10), score:ns});
+                scores.sort((a,b)=>b.score-a.score);
+                localStorage.setItem('quimicaScores', JSON.stringify(scores.slice(0,5)));
+                showLeaderboard(true);
+            },100);
+        }
+        function showLeaderboard(fromGame) {
+            if(!fromGame) switchMode('builder');
+            switchLeaderboardTab(activeLeaderboardTab);
+            if(!fromGame) {
+                document.getElementById('modal-msg').style.display='none';
+                document.getElementById('leaderboard-section').style.display='block';
+                document.getElementById('replay-btn').style.display='none';
+                showModal();
+            } else { showModal(); }
+        }
+        function showModal() { document.getElementById('modal-overlay').style.display='flex'; }
+        function closeModal() { document.getElementById('modal-overlay').style.display='none'; document.getElementById('replay-btn').style.display='block'; }
+
+        // --- LÓGICA CONSTRUCTOR ---
+        function updateBuilder(t, d) {
+            initAudio();
+            if(t==='p') b_p=Math.max(1, Math.min(20, b_p+d));
+            if(t==='n') b_n=Math.max(0, Math.min(30, b_n+d));
+            if(t==='e') b_e=Math.max(0, Math.min(20, b_e+d));
+            updateBuilderUI();
+        }
+        function setNeutral() { b_e=b_p; updateBuilderUI(); }
+
+        function updateBuilderUI() {
+            document.getElementById('p-count').innerText=b_p; document.getElementById('n-count').innerText=b_n; document.getElementById('e-count').innerText=b_e;
+            const Z=b_p, N=b_n, A=Z+N, C=Z-b_e, el=elementsBasic[Z];
+            document.getElementById('a-count-left').innerText=A;
+            document.getElementById('data-sym').innerText=el[0]; document.getElementById('data-z').innerText=Z; document.getElementById('data-a').innerText=A;
+            document.getElementById('data-name').innerText=`${el[1]}-${A}`;
+            const ct=document.getElementById('data-charge-tag'); ct.innerText=`Carga: ${C>0?'+'+C:C}`; ct.className = C===0?'tag stable':(C>0?'tag unstable':'tag radioactive');
+
+            // Estabilidad
+            let stab="unstable", text="Inestable. Revisa la relación N/Z.";
+            if(isotopeDB[Z] && isotopeDB[Z][N]) { stab = isotopeDB[Z][N][0]==='S'?'stable':'radioactive'; text=stab==='stable'?"Núcleo estable.":"Núcleo radiactivo."; }
+            const st=document.getElementById('stability-tag'), na=document.getElementById('neutron-advice');
+            st.innerText=stab==='stable'?"Estable":(stab==='radioactive'?"Radiactivo":"Inestable");
+            st.className = `tag ${stab}`; na.innerText=text; na.style.color=stab==='stable'?'var(--correct)':'var(--error)';
+
+            // Config Electrónica
+            let orbs=[{n:'1s',m:2},{n:'2s',m:2},{n:'2p',m:6},{n:'3s',m:2},{n:'3p',m:6},{n:'4s',m:2}], conf=[], rem=b_e;
+            for(let o of orbs){if(rem<=0)break; let f=Math.min(rem,o.m); conf.push(`${o.n}<sup>${f}</sup>`); rem-=f;}
+            document.getElementById('b-config').innerHTML=conf.length?conf.join(' '):"Sin electrones";
+
+            drawAtom(Z,N,b_e,stab); checkMission();
+        }
+
+        function drawAtom(p, n, e, stab) {
+            const v = document.getElementById('atom-viewer'); v.innerHTML = ''; activeElectrons = [];
+            const nucl = document.createElement('div'); nucl.className = 'nucleus-container';
+            if (stab === 'radioactive') nucl.classList.add('vibrate-mild'); if (stab === 'unstable') nucl.classList.add('vibrate-strong');
+            let parts = []; for(let i=0;i<p;i++)parts.push({t:'p'}); for(let i=0;i<n;i++)parts.push({t:'n'});
+            parts.sort(()=>Math.random()-0.5);
+            const phi = Math.PI*(3-Math.sqrt(5)), scale = Math.max(8, Math.min(25, Math.cbrt(parts.length)*6));
+            parts.forEach((pt,i)=>{
+                 const y=1-(i/(parts.length-1))*2, rY=Math.sqrt(1-y*y), th=phi*i;
+                 pt.x=Math.cos(th)*rY*scale; pt.y=y*scale; pt.z=Math.sin(th)*rY*scale;
+            });
+            parts.sort((a,b)=>a.z-b.z).forEach(pt=>{
+                const el=document.createElement('div'); el.className=`nucleon ${pt.t}`;
+                const s=0.7+((pt.z+scale)/(2*scale))*0.5;
+                el.style.transform=`translate(${pt.x}px,${pt.y}px) scale(${s})`;
+                if(pt.z<0)el.style.filter=`brightness(${90+(pt.z/scale)*40}%)`;
+                nucl.appendChild(el);
+            });
+            v.appendChild(nucl);
+
+            let lvls=[0,0,0,0], remE=e; [2,8,18,8].forEach((m,i)=>{let f=Math.min(m,remE);lvls[i]=f;remE-=f;});
+            lvls.forEach((c,i)=>{
+                if(c>0){
+                    const rad=70+(i*40), shell=document.createElement('div');
+                    shell.className='shell'; shell.style.width=`${rad*2}px`; shell.style.height=`${rad*2}px`; v.appendChild(shell);
+                    for(let j=0;j<c;j++){
+                        const el=document.createElement('div'); el.className='electron'; v.appendChild(el);
+                        activeElectrons.push({el:el, r:rad, ang:j*(2*Math.PI)/c, idx:i});
+                    }
+                }
+            });
+        }
+
+        function animate() {
+            animationTime+=0.02;
+            activeElectrons.forEach(o=>{
+                const cur=o.ang+(animationTime*(1-o.idx*0.15));
+                o.el.style.transform=`translate(${o.r*Math.cos(cur)}px, ${o.r*Math.sin(cur)}px)`;
+            });
+            requestAnimationFrame(animate);
+        }
+
+        // --- ADIVINANZA ATÓMICA ---
+
+        // Función para generar la configuración electrónica textual
+        function getElectronConfig(z) {
+            let orbs=[{n:'1s',m:2},{n:'2s',m:2},{n:'2p',m:6},{n:'3s',m:2},{n:'3p',m:6},{n:'4s',m:2}], conf=[], rem=z;
+            for(let o of orbs){if(rem<=0)break; let f=Math.min(rem,o.m); conf.push(`${o.n}${f}`); rem-=f;}
+            return conf.join(' ');
+        }
+        function getElectronConfigHTML(z) {
+            let orbs=[{n:'1s',m:2},{n:'2s',m:2},{n:'2p',m:6},{n:'3s',m:2},{n:'3p',m:6},{n:'4s',m:2}], conf=[], rem=z;
+            for(let o of orbs){if(rem<=0)break; let f=Math.min(rem,o.m); conf.push(`${o.n}<sup>${f}</sup>`); rem-=f;}
+            return conf.join(' ');
+        }
+
+        // 30 Misiones de Adivinanza
+        const allGuessMissions = [
+            // Tipo: por Z (número atómico)
+            { clue: "Z = 1. Es el elemento más ligero del universo.", answer: 1, type: 'z' },
+            { clue: "Z = 6. Base fundamental de la química orgánica.", answer: 6, type: 'z' },
+            { clue: "Z = 8. Esencial para la respiración.", answer: 8, type: 'z' },
+            { clue: "Z = 11. Metal alcalino que reacciona violentamente con agua.", answer: 11, type: 'z' },
+            { clue: "Z = 17. Gas amarillo-verdoso muy reactivo, usado como desinfectante.", answer: 17, type: 'z' },
+            { clue: "Z = 2. Gas noble más ligero, usado en globos.", answer: 2, type: 'z' },
+            { clue: "Z = 7. Compone el 78% de la atmósfera terrestre.", answer: 7, type: 'z' },
+            { clue: "Z = 20. Metal alcalinotérreo esencial para los huesos.", answer: 20, type: 'z' },
+            { clue: "Z = 10. Gas noble usado en letreros luminosos.", answer: 10, type: 'z' },
+            { clue: "Z = 15. No metal esencial para el ADN y ATP.", answer: 15, type: 'z' },
+            // Tipo: por A (número másico)
+            { clue: "A = 4, Z = 2. Núcleo emitido en decaimiento alfa.", answer: 2, type: 'a' },
+            { clue: "A = 23, Z = 11. Presente en la sal de mesa.", answer: 11, type: 'a' },
+            { clue: "A = 12, Z = 6. Isótopo más abundante de este elemento orgánico.", answer: 6, type: 'a' },
+            { clue: "A = 14, Z = 7. Isótopo estable principal del aire.", answer: 7, type: 'a' },
+            { clue: "A = 40, Z = 18. Gas noble más abundante en la atmósfera después del N y O.", answer: 18, type: 'a' },
+            { clue: "A = 16, Z = 8. Isótopo principal del gas vital para respirar.", answer: 8, type: 'a' },
+            { clue: "A = 19, Z = 9. Halógeno más electronegativo.", answer: 9, type: 'a' },
+            { clue: "A = 40, Z = 20. Metal que fortalece huesos y dientes.", answer: 20, type: 'a' },
+            { clue: "A = 7, Z = 3. Metal alcalino más ligero.", answer: 3, type: 'a' },
+            { clue: "A = 32, Z = 16. Elemento amarillo con olor característico.", answer: 16, type: 'a' },
+            // Tipo: por configuración electrónica
+            { clue: "Configuración: 1s² 2s² 2p⁶ 3s¹. Un electrón en su última capa.", answer: 11, type: 'config' },
+            { clue: "Configuración: 1s² 2s² 2p⁶. Tiene su capa de valencia completa.", answer: 10, type: 'config' },
+            { clue: "Configuración: 1s² 2s² 2p⁴. Le faltan 2 electrones para completar su capa.", answer: 8, type: 'config' },
+            { clue: "Configuración: 1s². Solo tiene 2 electrones.", answer: 2, type: 'config' },
+            { clue: "Configuración: 1s² 2s² 2p⁶ 3s² 3p⁶. Último gas noble del período 3.", answer: 18, type: 'config' },
+            { clue: "Configuración: 1s² 2s² 2p⁶ 3s² 3p⁵. Halógeno del período 3.", answer: 17, type: 'config' },
+            { clue: "Configuración: 1s² 2s² 2p². Tiene 4 electrones de valencia.", answer: 6, type: 'config' },
+            { clue: "Configuración: 1s² 2s² 2p⁶ 3s² 3p³. No metal del grupo 15, período 3.", answer: 15, type: 'config' },
+            { clue: "Configuración: 1s² 2s¹. Metal alcalino del período 2.", answer: 3, type: 'config' },
+            { clue: "Configuración: 1s² 2s² 2p⁶ 3s² 3p⁶ 4s². Último elemento del período 4 que cubrimos.", answer: 20, type: 'config' }
+        ];
+
+        function generateDistractors(correctZ, count) {
+            let options = [correctZ];
+            let pool = [];
+            for (let i = 1; i <= 20; i++) { if (i !== correctZ) pool.push(i); }
+            pool.sort(() => Math.random() - 0.5);
+            for (let i = 0; i < count - 1 && i < pool.length; i++) options.push(pool[i]);
+            return options.sort(() => Math.random() - 0.5);
+        }
+
+        function drawMiniAtom(container, z) {
+            container.innerHTML = '';
+            const nucDiv = document.createElement('div');
+            nucDiv.className = 'mini-nucleus';
+            // simplified nucleons - show up to 6 protons and neutrons for visual
+            const showP = Math.min(z, 6), showN = Math.min(z, 6);
+            const phi2 = Math.PI * (3 - Math.sqrt(5));
+            const parts2 = [];
+            for (let i = 0; i < showP; i++) parts2.push('p');
+            for (let i = 0; i < showN; i++) parts2.push('n');
+            parts2.sort(() => Math.random() - 0.5);
+            const sc = Math.max(3, Math.min(8, Math.cbrt(parts2.length) * 3));
+            parts2.forEach((t, i) => {
+                const y2 = parts2.length > 1 ? 1 - (i / (parts2.length - 1)) * 2 : 0;
+                const rY2 = Math.sqrt(1 - y2 * y2);
+                const th2 = phi2 * i;
+                const x = Math.cos(th2) * rY2 * sc;
+                const y = y2 * sc;
+                const nuc = document.createElement('div');
+                nuc.className = `mini-nucleon ${t}`;
+                nuc.style.left = `${30 + x - 3}px`;
+                nuc.style.top = `${30 + y - 3}px`;
+                container.appendChild(nuc);
+            });
+            // Shells
+            let remE = z, lvls = [];
+            [2, 8, 8, 2].forEach((m) => { let f = Math.min(m, remE); lvls.push(f); remE -= f; });
+            const radii = [12, 20, 28, 35];
+            lvls.forEach((c, i) => {
+                if (c > 0) {
+                    const shell = document.createElement('div');
+                    shell.className = 'mini-shell';
+                    shell.style.width = `${radii[i] * 2}px`;
+                    shell.style.height = `${radii[i] * 2}px`;
+                    container.appendChild(shell);
+                    for (let j = 0; j < c; j++) {
+                        const ang = (j / c) * Math.PI * 2;
+                        const ex = 30 + Math.cos(ang) * radii[i] - 2;
+                        const ey = 30 + Math.sin(ang) * radii[i] - 2;
+                        const elec = document.createElement('div');
+                        elec.className = 'mini-electron';
+                        elec.style.left = `${ex}px`;
+                        elec.style.top = `${ey}px`;
+                        container.appendChild(elec);
+                    }
+                }
+            });
+        }
+
+        function startGuessing() {
+            currentMode = 'guess'; guessScore = 0; guessIndex = 0; guessLocked = false;
+            clearInterval(timerInterval);
+            document.getElementById('mission-panel').style.display = 'none';
+            document.getElementById('builder-section').style.display = 'none';
+            document.getElementById('guess-panel').style.display = 'block';
+            guessMissions = [...allGuessMissions].sort(() => 0.5 - Math.random()).slice(0, 5);
+            loadGuessQuestion();
+        }
+
+        function loadGuessQuestion() {
+            guessLocked = false;
+            if (guessIndex >= guessMissions.length) { endGuessGame(); return; }
+            const m = guessMissions[guessIndex];
+            document.getElementById('guess-tracker').innerText = `${guessIndex + 1}/5`;
+            document.getElementById('guess-score-display').innerText = guessScore;
+            document.getElementById('guess-clue-text').innerHTML = m.clue;
+            const optionsContainer = document.getElementById('guess-options-container');
+            optionsContainer.innerHTML = '';
+            const choices = generateDistractors(m.answer, 6);
+            choices.forEach(z => {
+                const el = elementsBasic[z];
+                const card = document.createElement('div');
+                card.className = 'guess-card';
+                card.innerHTML = `
+                    <span class="card-z">Z = ${z}</span>
+                    <div class="card-mini-atom" id="mini-atom-${z}"></div>
+                    <span class="card-symbol">${el[0]}</span>
+                    <span class="card-name">${el[1]}</span>
+                `;
+                card.addEventListener('click', () => handleGuessChoice(z, m.answer, card));
+                optionsContainer.appendChild(card);
+                drawMiniAtom(card.querySelector('.card-mini-atom'), z);
+            });
+            startGuessTimer();
+        }
+
+        function startGuessTimer() {
+            clearInterval(guessTimerInterval);
+            guessTimeLeft = 40;
+            updateGuessTimerUI();
+            guessTimerInterval = setInterval(() => {
+                guessTimeLeft--;
+                updateGuessTimerUI();
+                if (guessTimeLeft <= 0) {
+                    clearInterval(guessTimerInterval);
+                    SoundManager.fail();
+                    guessLocked = true;
+                    // highlight correct answer
+                    highlightCorrectCard(guessMissions[guessIndex].answer);
+                    setTimeout(() => { guessIndex++; loadGuessQuestion(); }, 1200);
+                }
+            }, 1000);
+        }
+
+        function updateGuessTimerUI() {
+            const t = document.getElementById('guess-time-display');
+            t.innerText = guessTimeLeft;
+            t.classList.toggle('time-alert', guessTimeLeft <= 5);
+        }
+
+        function highlightCorrectCard(correctZ) {
+            const cards = document.querySelectorAll('.guess-card');
+            cards.forEach(card => {
+                const zVal = parseInt(card.querySelector('.card-z').innerText.replace('Z = ', ''));
+                if (zVal === correctZ) card.classList.add('correct-flash');
+            });
+        }
+
+        function handleGuessChoice(chosen, correct, card) {
+            if (guessLocked) return;
+            guessLocked = true;
+            clearInterval(guessTimerInterval);
+            if (chosen === correct) {
+                SoundManager.success();
+                card.classList.add('correct-flash');
+                guessScore += (100 + guessTimeLeft * 5);
+                document.getElementById('guess-score-display').innerText = guessScore;
+            } else {
+                SoundManager.fail();
+                card.classList.add('wrong-flash');
+                highlightCorrectCard(correct);
+            }
+            setTimeout(() => { guessIndex++; loadGuessQuestion(); }, 1200);
+        }
+
+        function endGuessGame() {
+            clearInterval(guessTimerInterval);
+            document.getElementById('guess-panel').style.display = 'none';
+            document.getElementById('builder-section').style.display = 'flex';
+            currentMode = 'builder';
+
+            const mt = document.getElementById('modal-title');
+            mt.innerText = '¡Adivinanza Completada!';
+            mt.style.color = 'var(--correct)';
+
+            const mm = document.getElementById('modal-msg');
+            mm.style.display = 'block';
+            document.getElementById('final-score').innerText = guessScore;
+
+            const ls = document.getElementById('leaderboard-section');
+            ls.style.display = 'block';
+
+            const rb = document.getElementById('replay-btn');
+            rb.innerText = 'Jugar de Nuevo';
+            rb.onclick = () => { closeModal(); startGuessing(); };
+
+            if (guessScore > 0) {
+                saveGuessScore(guessScore);
+            } else {
+                showLeaderboard(true);
+            }
+        }
+
+        function saveGuessScore(ns) {
+            setTimeout(() => {
+                let name = prompt("¡Récord Adivinanza! Tu nombre (max 10 letras):") || "Anónimo";
+                let scores = JSON.parse(localStorage.getItem('quimicaGuessScores') || '[]');
+                scores.push({ name: name.substring(0, 10), score: ns });
+                scores.sort((a, b) => b.score - a.score);
+                localStorage.setItem('quimicaGuessScores', JSON.stringify(scores.slice(0, 5)));
+                activeLeaderboardTab = 'adivinar';
+                showLeaderboard(true);
+            }, 100);
+        }
+
+        function switchLeaderboardTab(tab) {
+            activeLeaderboardTab = tab;
+            document.getElementById('tab-competir').style.background = tab === 'competir' ? 'var(--correct)' : '#414868';
+            document.getElementById('tab-competir').style.color = tab === 'competir' ? '#1a1b26' : 'var(--text-color)';
+            document.getElementById('tab-adivinar').style.background = tab === 'adivinar' ? '#ff9e64' : '#414868';
+            document.getElementById('tab-adivinar').style.color = tab === 'adivinar' ? '#1a1b26' : 'var(--text-color)';
+            const key = tab === 'competir' ? 'quimicaScores' : 'quimicaGuessScores';
+            const subtitle = tab === 'competir' ? 'TOP 5 CIENTÍFICOS' : 'TOP 5 ADIVINADORES';
+            document.getElementById('leaderboard-subtitle').innerText = subtitle;
+            const b = document.getElementById('leaderboard-body');
+            b.innerHTML = '';
+            let s = JSON.parse(localStorage.getItem(key) || '[]');
+            if (s.length === 0) b.innerHTML = '<tr><td colspan="3">Sin récords aún.</td></tr>';
+            else s.forEach((d, i) => b.innerHTML += `<tr><td>${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}</td><td>${d.name}</td><td>${d.score}</td></tr>`);
+        }
+
+        window.onload = () => { attachHoldListeners(); updateBuilderUI(); requestAnimationFrame(animate); };
+    </script>
+</body>
+</html>
