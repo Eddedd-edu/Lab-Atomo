@@ -841,5 +841,92 @@
 
         window.onload = () => { attachHoldListeners(); updateBuilderUI(); requestAnimationFrame(animate); };
     </script>
+    <script type="module">
+  // 1. Importar las funciones de Firebase (Agregamos Firestore)
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+  // 2. Tu configuración exacta
+  const firebaseConfig = {
+    apiKey: "AIzaSyCw4JnCCFHVogAEXncodxi9jnwigO7qUIA",
+    authDomain: "quimicaquest.firebaseapp.com",
+    projectId: "quimicaquest",
+    storageBucket: "quimicaquest.firebasestorage.app",
+    messagingSenderId: "796534851347",
+    appId: "1:796534851347:web:ae85716a8b612d889b3ce6",
+    measurementId: "G-XJP89X1R9K"
+  };
+
+  // 3. Inicializar Firebase y Firestore
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // 4. Función para GUARDAR un nuevo récord globalmente
+  async function saveScoreGlobal(score) {
+      let playerName = prompt("¡Buen trabajo! Ingresa tu nombre para el récord global:") || "Científico Anónimo";
+      
+      try {
+          // Guardamos en una colección llamada "leaderboard"
+          await addDoc(collection(db, "leaderboard"), {
+              name: playerName,
+              score: score,
+              date: new Date()
+          });
+          console.log("¡Récord guardado en la nube!");
+          
+          // Actualizamos la tabla visualmente
+          updateLeaderboardUI();
+      } catch (e) {
+          console.error("Error al guardar el récord: ", e);
+      }
+  }
+
+  // 5. Función para LEER los mejores 5 récords de todo el mundo
+  async function updateLeaderboardUI() {
+      const tbody = document.getElementById('leaderboard-body');
+      tbody.innerHTML = '<tr><td colspan="3">Cargando datos satelitales... 🛰️</td></tr>';
+      
+      try {
+          // Pedimos los datos ordenados de mayor a menor puntaje, limitando a los mejores 5
+          const q = query(collection(db, "leaderboard"), orderBy("score", "desc"), limit(5));
+          const querySnapshot = await getDocs(q);
+          
+          tbody.innerHTML = ''; // Limpiamos el mensaje de carga
+          let position = 1;
+          
+          querySnapshot.forEach((doc) => {
+              const data = doc.data();
+              let row = `<tr>
+                  <td>${position}</td>
+                  <td>${data.name}</td>
+                  <td style="color: var(--correct); font-weight: bold;">${data.score}</td>
+              </tr>`;
+              tbody.innerHTML += row;
+              position++;
+          });
+          
+          // Si no hay datos aún
+          if (querySnapshot.empty) {
+              tbody.innerHTML = '<tr><td colspan="3">¡Sé el primero en la tabla!</td></tr>';
+          }
+      } catch (e) {
+          console.error("Error al obtener los récords: ", e);
+          tbody.innerHTML = '<tr><td colspan="3">Error de conexión ❌</td></tr>';
+      }
+  }
+
+  // IMPORTANTE: Como usamos type="module", las funciones no son globales por defecto.
+  // Tenemos que adjuntarlas a 'window' para que tus botones HTML (onclick) puedan llamarlas.
+  window.saveScore = saveScoreGlobal;
+  window.updateLeaderboardUI = updateLeaderboardUI;
+  
+  window.showLeaderboard = function(showModal = true) {
+      updateLeaderboardUI(); // Llama a Firebase
+      if(showModal) {
+          document.getElementById('modal-overlay').style.display = 'flex';
+          document.getElementById('modal-msg').style.display = 'none'; 
+      }
+  };
+</script>
 </body>
 </html>
