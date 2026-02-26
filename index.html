@@ -6,6 +6,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>QuimicaQuest Móvil</title>
     <style>
+        /* Efecto de Cristal (Glassmorphism) para los paneles */
+.builder-controls, .builder-data, #mission-panel, #guess-panel {
+    background: rgba(36, 40, 59, 0.7) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Mejora de los botones */
+.controls button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding: 10px !important;
+    border-radius: 12px !important;
+    text-transform: uppercase;
+    font-size: 0.75rem !important;
+    letter-spacing: 1px;
+    border-bottom: 4px solid rgba(0,0,0,0.2) !important; /* Efecto 3D */
+}
+
+.controls button i {
+    font-size: 1.2rem;
+}
+
+/* Animación de entrada para el visor del átomo */
+.canvas-box {
+    border: 2px solid var(--metal);
+    background: radial-gradient(circle, #1a1b26 0%, #0f101a 100%) !important;
+}
+
+/* Mejora de los contadores de partículas */
+.btn-hold {
+    border-radius: 50% !important; /* Botones redondos */
+    box-shadow: 0 4px 0px #2a2f45;
+    transition: all 0.1s;
+}
+
+.btn-hold:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0px #2a2f45;
+}
+
+/* Gradientes en las etiquetas de datos */
+.big-sym {
+    background: linear-gradient(180deg, #7aa2f7, #3d59a1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 10px rgba(122, 162, 247, 0.5));
+}
         :root {
             --bg-color: #1a1b26;
             --panel-bg: #24283b; --text-color: #c0caf5;
@@ -156,19 +207,19 @@
         <p id="subtitle">Laboratorio Atómico de Bolsillo</p>
         <div class="controls">
     <button onclick="switchMode('builder')" class="btn-special">
-        <i class="fas fa-flask"></i> Libre
+        <i class="fas fa-flask"></i> ⚛️ Libre
     </button>
     <button onclick="startPractice()" style="background-color: var(--metalloid); color: #1a1b26;">
-        <i class="fas fa-graduation-cap"></i> Práctica
+        <i class="fas fa-graduation-cap"></i> 🛠️ Práctica
     </button>
     <button onclick="startMissions()" style="background-color: var(--correct); color: #1a1b26;">
-        <i class="fas fa-vial"></i> Competir
+        <i class="fas fa-vial"></i> 🎯 Competir
     </button>
     <button onclick="startGuessing()" style="background-color: #ff9e64; color: #1a1b26;">
-        <i class="fas fa-lightbulb"></i> Adivinar
+        <i class="fas fa-lightbulb"></i> 🔬 Adivinar
     </button>
     <button onclick="showLeaderboard(false)" style="background-color: var(--noble); color: #1a1b26;">
-        <i class="fas fa-trophy"></i> Récords
+        <i class="fas fa-trophy"></i> 🏆 Récords
     </button>
 </div>
     </header>
