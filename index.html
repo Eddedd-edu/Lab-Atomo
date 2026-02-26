@@ -155,12 +155,22 @@
         <h1>QuimicaQuest Móvil</h1>
         <p id="subtitle">Laboratorio Atómico de Bolsillo</p>
         <div class="controls">
-            <button onclick="switchMode('builder')" class="btn-special"> Libre</button>
-            <button onclick="startPractice()" style="background-color: var(--metalloid); color: #1a1b26;"> Práctica</button>
-            <button onclick="startMissions()" style="background-color: var(--correct); color: #1a1b26;"> Competir</button>
-            <button onclick="startGuessing()" style="background-color: #ff9e64; color: #1a1b26;"> Adivinar</button>
-            <button onclick="showLeaderboard(false)" style="background-color: var(--noble); color: #1a1b26;"> Récords</button>
-        </div>
+    <button onclick="switchMode('builder')" class="btn-special">
+        <i class="fas fa-flask"></i> Libre
+    </button>
+    <button onclick="startPractice()" style="background-color: var(--metalloid); color: #1a1b26;">
+        <i class="fas fa-graduation-cap"></i> Práctica
+    </button>
+    <button onclick="startMissions()" style="background-color: var(--correct); color: #1a1b26;">
+        <i class="fas fa-vial"></i> Competir
+    </button>
+    <button onclick="startGuessing()" style="background-color: #ff9e64; color: #1a1b26;">
+        <i class="fas fa-lightbulb"></i> Adivinar
+    </button>
+    <button onclick="showLeaderboard(false)" style="background-color: var(--noble); color: #1a1b26;">
+        <i class="fas fa-trophy"></i> Récords
+    </button>
+</div>
     </header>
 
     <div id="mission-panel">
@@ -251,23 +261,7 @@
                 <strong>Configuración Electrónica:</strong>
                 <div id="b-config" style="font-family: 'Courier New', monospace; color:var(--electron-color); margin-top:8px; font-size:1.2rem; font-weight:bold;">1s<sup>1</sup></div>
             </div>
-            <div class="controls">
-    <button onclick="switchMode('builder')" class="btn-special">
-        <i class="fas fa-flask"></i> Libre
-    </button>
-    <button onclick="startPractice()" style="background-color: var(--metalloid); color: #1a1b26;">
-        <i class="fas fa-graduation-cap"></i> Práctica
-    </button>
-    <button onclick="startMissions()" style="background-color: var(--correct); color: #1a1b26;">
-        <i class="fas fa-vial"></i> Competir
-    </button>
-    <button onclick="startGuessing()" style="background-color: #ff9e64; color: #1a1b26;">
-        <i class="fas fa-lightbulb"></i> Adivinar
-    </button>
-    <button onclick="showLeaderboard(false)" style="background-color: var(--noble); color: #1a1b26;">
-        <i class="fas fa-trophy"></i> Récords
-    </button>
-</div>
+           
         </div>
     </div>
 
