@@ -6,10 +6,12 @@
     <title>QuimicaQuest Móvil</title>
     <style>
         :root {
-            --bg-color: #1a1b26; --panel-bg: #24283b; --text-color: #c0caf5;
+            --bg-color: #1a1b26;
+            --panel-bg: #24283b; --text-color: #c0caf5;
             --metal: #3d59a1; --nonmetal: #9ece6a; --metalloid: #e0af68; --noble: #bb9af7;
             --correct: #73daca; --error: #f7768e;
-            --proton-color: #f7768e; --neutron-color: #737c9c; --electron-color: #7dcfff;
+            --proton-color: #f7768e; --neutron-color: #737c9c;
+            --electron-color: #7dcfff;
             --stable: #9ece6a; --radioactive: #e0af68; --unstable: #f7768e;
             --warning: #ff9e64;
         }
@@ -21,7 +23,7 @@
             background-color: var(--bg-color); color: var(--text-color);
             margin: 0; padding: 15px;
             display: flex; flex-direction: column; align-items: center;
-            touch-action: manipulation; /* Mejora respuesta táctil */
+            touch-action: manipulation;
         }
 
         header { text-align: center; width: 100%; max-width: 1200px; margin-bottom: 15px; }
@@ -32,8 +34,7 @@
         .controls button {
             background-color: #7aa2f7; color: #1a1b26; border: none; padding: 12px 15px;
             border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1rem;
-            transition: 0.2s; flex: 1 1 auto; /* Botones flexibles */
-            min-width: 120px; max-width: 200px;
+            transition: 0.2s; flex: 1 1 auto; min-width: 120px; max-width: 200px;
         }
         .controls button:active { transform: scale(0.96); }
         button.btn-special { background-color: #e0af68; }
@@ -60,10 +61,8 @@
         .particle-label small { opacity: 0.7; font-size: 0.85rem; }
         
         .counter-wrapper { display: flex; align-items: center; gap: 5px; }
-        /* Botones grandes para pulgares */
         .btn-hold {
-            padding: 10px 0; width: 50px; height: 50px; /* Cuadrados grandes */
-            font-size: 1.8rem; font-weight: bold;
+            padding: 10px 0; width: 50px; height: 50px; font-size: 1.8rem; font-weight: bold;
             background: #414868; color: white; border: none; border-radius: 10px;
             display: flex; justify-content: center; align-items: center;
             cursor: pointer; user-select: none; -webkit-user-select: none;
@@ -115,11 +114,7 @@
         .guess-clue { font-size: 1.3rem; font-weight: bold; margin: 10px 0 20px 0; line-height: 1.4; color: var(--electron-color); background: rgba(125,207,255,0.1); padding: 15px; border-radius: 10px; }
         .guess-stats { display: flex; justify-content: space-around; align-items: center; background: var(--panel-bg); padding: 10px; border-radius: 8px; font-weight: bold; margin-bottom: 15px; }
         .guess-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 15px; }
-        .guess-card {
-            background: var(--panel-bg); border: 2px solid #414868; border-radius: 12px; padding: 12px 8px;
-            cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-            display: flex; flex-direction: column; align-items: center; gap: 4px; position: relative; overflow: hidden;
-        }
+        .guess-card { background: var(--panel-bg); border: 2px solid #414868; border-radius: 12px; padding: 12px 8px; cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; display: flex; flex-direction: column; align-items: center; gap: 4px; position: relative; overflow: hidden; }
         .guess-card:hover { transform: scale(1.12); box-shadow: 0 8px 25px rgba(122,162,247,0.3); border-color: #7aa2f7; z-index: 10; }
         .guess-card .card-symbol { font-size: 2rem; font-weight: 800; color: #7aa2f7; }
         .guess-card .card-name { font-size: 0.85rem; font-weight: 600; color: var(--text-color); }
@@ -140,23 +135,14 @@
         @media (max-width: 900px) {
             body { padding: 10px; }
             h1 { font-size: 1.5rem; }
-            
-            /* Apilar los paneles verticalmente */
             #builder-section { flex-direction: column; align-items: stretch; gap: 15px; }
-            
-            /* REORDENAR PARA MÓVIL: 1. Visor, 2. Controles, 3. Datos */
             .builder-canvas-container { order: 1; }
             .builder-controls { order: 2; }
             .builder-data { order: 3; }
-
-            /* Ajustar anchos y alturas */
             .builder-controls, .builder-data, .builder-canvas-container { min-width: 100%; width: 100%; }
-            .canvas-box { height: 380px; /* Un poco más bajo en móvil */ }
-
-            /* Ajustes del panel de misiones */
+            .canvas-box { height: 380px; }
             .mission-stats { flex-wrap: wrap; gap: 10px; justify-content: center; }
             .mission-stats > div { font-size: 1rem; }
-            /* Ajustes del panel de adivinanza */
             .guess-options { grid-template-columns: repeat(2, 1fr); gap: 10px; }
             .guess-stats { flex-wrap: wrap; gap: 8px; justify-content: center; }
         }
@@ -168,11 +154,11 @@
         <h1>QuimicaQuest Móvil</h1>
         <p id="subtitle">Laboratorio Atómico de Bolsillo</p>
         <div class="controls">
-            <button onclick="switchMode('builder')" class="btn-special">⚛️ Libre</button>
-            <button onclick="startPractice()" style="background-color: var(--metalloid); color: #1a1b26;">🛠️ Práctica</button>
-            <button onclick="startMissions()" style="background-color: var(--correct); color: #1a1b26;">🎯 Competir</button>
-            <button onclick="startGuessing()" style="background-color: #ff9e64; color: #1a1b26;">🔬 Adivinar</button>
-            <button onclick="showLeaderboard(false)" style="background-color: var(--noble); color: #1a1b26;">🏆 Récords</button>
+            <button onclick="switchMode('builder')" class="btn-special"> Libre</button>
+            <button onclick="startPractice()" style="background-color: var(--metalloid); color: #1a1b26;"> Práctica</button>
+            <button onclick="startMissions()" style="background-color: var(--correct); color: #1a1b26;"> Competir</button>
+            <button onclick="startGuessing()" style="background-color: #ff9e64; color: #1a1b26;"> Adivinar</button>
+            <button onclick="showLeaderboard(false)" style="background-color: var(--noble); color: #1a1b26;"> Récords</button>
         </div>
     </header>
 
@@ -182,8 +168,8 @@
         <div class="mission-stats">
             <div>Prog: <span id="mission-tracker" style="color:var(--noble)">0/5</span></div>
             <div id="score-container">Pts: <span id="score-display" style="color:var(--correct)">0</span></div>
-            <div id="time-container">⏱️ <span id="time-display" style="color:var(--warning)">60</span>s</div>
-            <button id="hint-btn" onclick="showHint()" style="display:none; background-color: var(--electron-color); color: #1a1b26; padding: 8px 12px; border:none; border-radius:6px; font-weight:bold; font-size:0.9rem;">💡 Pista</button>
+            <div id="time-container"> <span id="time-display" style="color:var(--warning)">60</span>s</div>
+            <button id="hint-btn" onclick="showHint()" style="display:none; background-color: var(--electron-color); color: #1a1b26; padding: 8px 12px; border:none; border-radius:6px; font-weight:bold; font-size:0.9rem;"> Pista</button>
         </div>
         <p id="hint-text"></p>
     </div>
@@ -193,7 +179,7 @@
         <div class="guess-stats">
             <div>Misión: <span id="guess-tracker" style="color:var(--noble)">1/5</span></div>
             <div>Pts: <span id="guess-score-display" style="color:var(--correct)">0</span></div>
-            <div>⏱️ <span id="guess-time-display" style="color:var(--warning)">40</span>s</div>
+            <div> <span id="guess-time-display" style="color:var(--warning)">40</span>s</div>
         </div>
         <div class="guess-clue" id="guess-clue-text">-</div>
         <div class="guess-options" id="guess-options-container"></div>
@@ -227,14 +213,14 @@
             
             <h3 style="margin-top:20px; color:var(--electron-color); text-align:center;">Nube Electrónica</h3>
              <div class="particle-control" data-type="e">
-                 <div class="particle-label"><strong style="color:var(--electron-color)">Electrones (e⁻)</strong><small>Define Carga</small></div>
+                 <div class="particle-label"><strong style="color:var(--electron-color)">Electrones (e)</strong><small>Define Carga</small></div>
                  <div class="counter-wrapper">
                     <button class="btn-hold minus">-</button>
                     <span id="e-count" class="count-display">1</span>
                     <button class="btn-hold plus">+</button>
                 </div>
             </div>
-             <button class="neutral-btn" onclick="setNeutral()">⚡ Hacer Neutro (e⁻ = p⁺)</button>
+             <button class="neutral-btn" onclick="setNeutral()"> Hacer Neutro (e = p)</button>
         </div>
 
         <div class="builder-canvas-container">
@@ -291,7 +277,37 @@
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        // --- CONFIGURACIÓN E IMPORTACIONES FIREBASE ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCw4JnCCFHVogAEXncodxi9jnwigO7qUIA",
+            authDomain: "quimicaquest.firebaseapp.com",
+            projectId: "quimicaquest",
+            storageBucket: "quimicaquest.firebasestorage.app",
+            messagingSenderId: "796534851347",
+            appId: "1:796534851347:web:ae85716a8b612d889b3ce6",
+            measurementId: "G-XJP89X1R9K"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getFirestore(app);
+
+        // --- EXPOSICIÓN GLOBAL (NECESARIO PARA BOTONES EN HTML) ---
+        window.switchMode = switchMode;
+        window.startPractice = startPractice;
+        window.startMissions = startMissions;
+        window.startGuessing = startGuessing;
+        window.showLeaderboard = showLeaderboard;
+        window.switchLeaderboardTab = switchLeaderboardTab;
+        window.closeModal = closeModal;
+        window.setNeutral = setNeutral;
+        window.showHint = showHint;
+
         // --- GESTIÓN DE AUDIO ---
         let audioCtx = null;
         function initAudio() { if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } }
@@ -319,15 +335,13 @@
             15:{16:["S"]}, 16:{16:["S"],17:["S"],18:["S"],20:["S"]}, 17:{18:["S"],20:["S"]},
             18:{18:["S"],20:["S"],22:["S"]}, 19:{20:["S"],22:["S"]}, 20:{20:["S"],22:["S"],23:["S"],24:["S"],26:["S"]}
         };
-        
-        // Misiones (Simplificadas para el ejemplo)
         const allMissions = [
             { text: "Crea Carbono-12 Neutro (6p, 6n, 6e).", target: { p: 6, n: 6, e: 6 } },
             { text: "Crea Anión Óxido O-2 (Masa 16).", target: { p: 8, n: 8, e: 10 } },
             { text: "Crea Tritio (H-3 Neutro).", target: { p: 1, n: 2, e: 1 } },
             { text: "Crea Catión Litio Li+ (Masa 7).", target: { p: 3, n: 4, e: 2 } },
             { text: "Crea una Partícula Alfa (Núcleo He-4).", target: { p: 2, n: 2, e: 0 } },
-             { text: "Construye un Anión Cloruro (Cl-) con masa 35.", target: { p: 17, n: 18, e: 18 } },
+            { text: "Construye un Anión Cloruro (Cl-) con masa 35.", target: { p: 17, n: 18, e: 18 } },
             { text: "Crea un Catión de Calcio (Ca+2) con masa 40.", target: { p: 20, n: 20, e: 18 } },
             { text: "Construye un gas noble: Neón-20 (Neutro).", target: { p: 10, n: 10, e: 10 } }
         ];
@@ -343,15 +357,14 @@
         let activeElectrons = [], animationTime = 0;
         let gameMissions = [], currentMissionIndex = 0, score = 0, timeLeft = 60, timerInterval;
         let currentMode = 'builder';
-        let pressTimer = null, isPressing = false; // Para lógica de mantener presionado
+        let pressTimer = null, isPressing = false;
         let guessTimerInterval, guessTimeLeft = 40, guessMissions = [], guessIndex = 0, guessScore = 0, guessLocked = false;
         let activeLeaderboardTab = 'competir';
 
         // --- INICIALIZACIÓN Y EVENTOS ---
         document.addEventListener('click', () => initAudio(), { once: true });
-        document.addEventListener('touchstart', () => initAudio(), { once: true }); // Audio en móvil
+        document.addEventListener('touchstart', () => initAudio(), { once: true }); 
 
-        // Lógica "Press & Hold" para botones
         function attachHoldListeners() {
             document.querySelectorAll('.particle-control').forEach(ctrl => {
                 const type = ctrl.dataset.type;
@@ -364,14 +377,13 @@
 
         function setupButton(btn, type, delta) {
             const start = (e) => {
-                if(e.cancelable) e.preventDefault(); // Evitar scroll/zoom al mantener
+                if(e.cancelable) e.preventDefault();
                 if(isPressing) return;
                 isPressing = true;
-                updateBuilder(type, delta); // Primer click inmediato
-                // Iniciar repetición tras una pausa
+                updateBuilder(type, delta); 
                 pressTimer = setTimeout(() => {
-                    pressTimer = setInterval(() => updateBuilder(type, delta), 90); // Velocidad de repetición
-                }, 300); // Pausa inicial
+                    pressTimer = setInterval(() => updateBuilder(type, delta), 90); 
+                }, 300);
             };
             const stop = () => {
                 clearTimeout(pressTimer);
@@ -389,14 +401,16 @@
 
         // --- LÓGICA DEL JUEGO ---
         function switchMode(mode) {
-            currentMode = mode; clearInterval(timerInterval); clearInterval(guessTimerInterval);
+            currentMode = mode;
+            clearInterval(timerInterval); clearInterval(guessTimerInterval);
             document.getElementById('mission-panel').style.display = 'none';
             document.getElementById('guess-panel').style.display = 'none';
             document.getElementById('builder-section').style.display = 'flex';
         }
 
         function startMissions() {
-            currentMode = 'timed'; score = 0; currentMissionIndex = 0;
+            currentMode = 'timed';
+            score = 0; currentMissionIndex = 0;
             clearInterval(guessTimerInterval);
             document.getElementById('guess-panel').style.display = 'none';
             document.getElementById('builder-section').style.display = 'flex';
@@ -406,7 +420,8 @@
         }
 
         function startPractice() {
-            currentMode = 'practice'; currentMissionIndex = 0;
+            currentMode = 'practice';
+            currentMissionIndex = 0;
             clearInterval(guessTimerInterval);
             document.getElementById('guess-panel').style.display = 'none';
             document.getElementById('builder-section').style.display = 'flex';
@@ -442,11 +457,13 @@
         }
 
         function startTimer() {
-            clearInterval(timerInterval); timeLeft=60; updateTimerUI();
+            clearInterval(timerInterval);
+            timeLeft=60; updateTimerUI();
             timerInterval = setInterval(()=>{ timeLeft--; updateTimerUI(); if(timeLeft<=0){clearInterval(timerInterval); SoundManager.fail(); currentMissionIndex++; setTimeout(()=>loadNextMission(), 500);} }, 1000);
         }
         function updateTimerUI() {
-            const t = document.getElementById('time-display'); t.innerText=timeLeft;
+            const t = document.getElementById('time-display');
+            t.innerText=timeLeft;
             t.classList.toggle('time-alert', timeLeft<=5);
         }
 
@@ -466,7 +483,8 @@
         }
 
         function endGame(won) {
-            clearInterval(timerInterval); const isTimed = currentMode==='timed'; currentMode='builder';
+            clearInterval(timerInterval);
+            const isTimed = currentMode==='timed'; currentMode='builder';
             if(isTimed && !won) SoundManager.fail();
             
             const mt = document.getElementById('modal-title');
@@ -478,7 +496,8 @@
             const rb = document.getElementById('replay-btn');
             
             if(isTimed) {
-                mm.style.display='block'; document.getElementById('final-score').innerText=score;
+                mm.style.display='block';
+                document.getElementById('final-score').innerText=score;
                 ls.style.display='block'; rb.innerText="Jugar de Nuevo"; rb.onclick=()=>{closeModal();startMissions();};
                 activeLeaderboardTab = 'competir';
                 saveScore(score);
@@ -489,17 +508,40 @@
             }
         }
 
-        function saveScore(ns) {
+        // --- GUARDADO DE PUNTAJES EN FIREBASE ---
+        async function saveScore(ns) {
             if(ns<=0) return;
-            setTimeout(()=>{
+            setTimeout(async () => {
                 let name = prompt("¡Récord! Tu nombre (max 10 letras):") || "Anónimo";
-                let scores = JSON.parse(localStorage.getItem('quimicaScores')||'[]');
-                scores.push({name:name.substring(0,10), score:ns});
-                scores.sort((a,b)=>b.score-a.score);
-                localStorage.setItem('quimicaScores', JSON.stringify(scores.slice(0,5)));
-                showLeaderboard(true);
-            },100);
+                name = name.substring(0, 10);
+                try {
+                    await addDoc(collection(db, "scores_competir"), {
+                        name: name,
+                        score: ns,
+                        timestamp: new Date()
+                    });
+                    showLeaderboard(true);
+                } catch(e) { console.error("Error guardando score:", e); }
+            }, 100);
         }
+
+        async function saveGuessScore(ns) {
+            if(ns<=0) return;
+            setTimeout(async () => {
+                let name = prompt("¡Récord Adivinanza! Tu nombre (max 10 letras):") || "Anónimo";
+                name = name.substring(0, 10);
+                try {
+                    await addDoc(collection(db, "scores_adivinar"), {
+                        name: name,
+                        score: ns,
+                        timestamp: new Date()
+                    });
+                    activeLeaderboardTab = 'adivinar';
+                    showLeaderboard(true);
+                } catch(e) { console.error("Error guardando score adivinanza:", e); }
+            }, 100);
+        }
+
         function showLeaderboard(fromGame) {
             if(!fromGame) switchMode('builder');
             switchLeaderboardTab(activeLeaderboardTab);
@@ -510,8 +552,39 @@
                 showModal();
             } else { showModal(); }
         }
+
         function showModal() { document.getElementById('modal-overlay').style.display='flex'; }
         function closeModal() { document.getElementById('modal-overlay').style.display='none'; document.getElementById('replay-btn').style.display='block'; }
+
+        // --- LECTURA DE PUNTAJES DE FIREBASE ---
+        async function switchLeaderboardTab(tab) {
+            activeLeaderboardTab = tab;
+            document.getElementById('tab-competir').style.background = tab === 'competir' ? 'var(--correct)' : '#414868';
+            document.getElementById('tab-competir').style.color = tab === 'competir' ? '#1a1b26' : 'var(--text-color)';
+            document.getElementById('tab-adivinar').style.background = tab === 'adivinar' ? '#ff9e64' : '#414868';
+            document.getElementById('tab-adivinar').style.color = tab === 'adivinar' ? '#1a1b26' : 'var(--text-color)';
+            
+            const collectionName = tab === 'competir' ? 'scores_competir' : 'scores_adivinar';
+            const subtitle = tab === 'competir' ? 'TOP 5 CIENTÍFICOS' : 'TOP 5 ADIVINADORES';
+            document.getElementById('leaderboard-subtitle').innerText = subtitle;
+            const b = document.getElementById('leaderboard-body');
+            
+            b.innerHTML = '<tr><td colspan="3">Cargando datos espaciales...</td></tr>';
+            
+            try {
+                const q = query(collection(db, collectionName), orderBy("score", "desc"), limit(5));
+                const querySnapshot = await getDocs(q);
+                let s = [];
+                querySnapshot.forEach((doc) => { s.push(doc.data()); });
+                
+                b.innerHTML = '';
+                if (s.length === 0) b.innerHTML = '<tr><td colspan="3">Sin récords aún. ¡Sé el primero!</td></tr>';
+                else s.forEach((d, i) => b.innerHTML += `<tr><td>${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}</td><td>${d.name}</td><td>${d.score}</td></tr>`);
+            } catch(e) {
+                console.error("Error obteniendo ranking:", e);
+                b.innerHTML = '<tr><td colspan="3">Error conectando al laboratorio central.</td></tr>';
+            }
+        }
 
         // --- LÓGICA CONSTRUCTOR ---
         function updateBuilder(t, d) {
@@ -524,32 +597,34 @@
         function setNeutral() { b_e=b_p; updateBuilderUI(); }
 
         function updateBuilderUI() {
-            document.getElementById('p-count').innerText=b_p; document.getElementById('n-count').innerText=b_n; document.getElementById('e-count').innerText=b_e;
+            document.getElementById('p-count').innerText=b_p;
+            document.getElementById('n-count').innerText=b_n; document.getElementById('e-count').innerText=b_e;
             const Z=b_p, N=b_n, A=Z+N, C=Z-b_e, el=elementsBasic[Z];
             document.getElementById('a-count-left').innerText=A;
             document.getElementById('data-sym').innerText=el[0]; document.getElementById('data-z').innerText=Z; document.getElementById('data-a').innerText=A;
             document.getElementById('data-name').innerText=`${el[1]}-${A}`;
-            const ct=document.getElementById('data-charge-tag'); ct.innerText=`Carga: ${C>0?'+'+C:C}`; ct.className = C===0?'tag stable':(C>0?'tag unstable':'tag radioactive');
+            const ct=document.getElementById('data-charge-tag'); ct.innerText=`Carga: ${C>0?'+'+C:C}`;
+            ct.className = C===0?'tag stable':(C>0?'tag unstable':'tag radioactive');
 
-            // Estabilidad
             let stab="unstable", text="Inestable. Revisa la relación N/Z.";
             if(isotopeDB[Z] && isotopeDB[Z][N]) { stab = isotopeDB[Z][N][0]==='S'?'stable':'radioactive'; text=stab==='stable'?"Núcleo estable.":"Núcleo radiactivo."; }
             const st=document.getElementById('stability-tag'), na=document.getElementById('neutron-advice');
             st.innerText=stab==='stable'?"Estable":(stab==='radioactive'?"Radiactivo":"Inestable");
-            st.className = `tag ${stab}`; na.innerText=text; na.style.color=stab==='stable'?'var(--correct)':'var(--error)';
+            st.className = `tag ${stab}`;
+            na.innerText=text; na.style.color=stab==='stable'?'var(--correct)':'var(--error)';
 
-            // Config Electrónica
             let orbs=[{n:'1s',m:2},{n:'2s',m:2},{n:'2p',m:6},{n:'3s',m:2},{n:'3p',m:6},{n:'4s',m:2}], conf=[], rem=b_e;
             for(let o of orbs){if(rem<=0)break; let f=Math.min(rem,o.m); conf.push(`${o.n}<sup>${f}</sup>`); rem-=f;}
             document.getElementById('b-config').innerHTML=conf.length?conf.join(' '):"Sin electrones";
-
             drawAtom(Z,N,b_e,stab); checkMission();
         }
 
         function drawAtom(p, n, e, stab) {
-            const v = document.getElementById('atom-viewer'); v.innerHTML = ''; activeElectrons = [];
+            const v = document.getElementById('atom-viewer');
+            v.innerHTML = ''; activeElectrons = [];
             const nucl = document.createElement('div'); nucl.className = 'nucleus-container';
-            if (stab === 'radioactive') nucl.classList.add('vibrate-mild'); if (stab === 'unstable') nucl.classList.add('vibrate-strong');
+            if (stab === 'radioactive') nucl.classList.add('vibrate-mild');
+            if (stab === 'unstable') nucl.classList.add('vibrate-strong');
             let parts = []; for(let i=0;i<p;i++)parts.push({t:'p'}); for(let i=0;i<n;i++)parts.push({t:'n'});
             parts.sort(()=>Math.random()-0.5);
             const phi = Math.PI*(3-Math.sqrt(5)), scale = Math.max(8, Math.min(25, Math.cbrt(parts.length)*6));
@@ -589,22 +664,7 @@
         }
 
         // --- ADIVINANZA ATÓMICA ---
-
-        // Función para generar la configuración electrónica textual
-        function getElectronConfig(z) {
-            let orbs=[{n:'1s',m:2},{n:'2s',m:2},{n:'2p',m:6},{n:'3s',m:2},{n:'3p',m:6},{n:'4s',m:2}], conf=[], rem=z;
-            for(let o of orbs){if(rem<=0)break; let f=Math.min(rem,o.m); conf.push(`${o.n}${f}`); rem-=f;}
-            return conf.join(' ');
-        }
-        function getElectronConfigHTML(z) {
-            let orbs=[{n:'1s',m:2},{n:'2s',m:2},{n:'2p',m:6},{n:'3s',m:2},{n:'3p',m:6},{n:'4s',m:2}], conf=[], rem=z;
-            for(let o of orbs){if(rem<=0)break; let f=Math.min(rem,o.m); conf.push(`${o.n}<sup>${f}</sup>`); rem-=f;}
-            return conf.join(' ');
-        }
-
-        // 30 Misiones de Adivinanza
         const allGuessMissions = [
-            // Tipo: por Z (número atómico)
             { clue: "Z = 1. Es el elemento más ligero del universo.", answer: 1, type: 'z' },
             { clue: "Z = 6. Base fundamental de la química orgánica.", answer: 6, type: 'z' },
             { clue: "Z = 8. Esencial para la respiración.", answer: 8, type: 'z' },
@@ -615,7 +675,6 @@
             { clue: "Z = 20. Metal alcalinotérreo esencial para los huesos.", answer: 20, type: 'z' },
             { clue: "Z = 10. Gas noble usado en letreros luminosos.", answer: 10, type: 'z' },
             { clue: "Z = 15. No metal esencial para el ADN y ATP.", answer: 15, type: 'z' },
-            // Tipo: por A (número másico)
             { clue: "A = 4, Z = 2. Núcleo emitido en decaimiento alfa.", answer: 2, type: 'a' },
             { clue: "A = 23, Z = 11. Presente en la sal de mesa.", answer: 11, type: 'a' },
             { clue: "A = 12, Z = 6. Isótopo más abundante de este elemento orgánico.", answer: 6, type: 'a' },
@@ -626,17 +685,16 @@
             { clue: "A = 40, Z = 20. Metal que fortalece huesos y dientes.", answer: 20, type: 'a' },
             { clue: "A = 7, Z = 3. Metal alcalino más ligero.", answer: 3, type: 'a' },
             { clue: "A = 32, Z = 16. Elemento amarillo con olor característico.", answer: 16, type: 'a' },
-            // Tipo: por configuración electrónica
-            { clue: "Configuración: 1s² 2s² 2p⁶ 3s¹. Un electrón en su última capa.", answer: 11, type: 'config' },
-            { clue: "Configuración: 1s² 2s² 2p⁶. Tiene su capa de valencia completa.", answer: 10, type: 'config' },
-            { clue: "Configuración: 1s² 2s² 2p⁴. Le faltan 2 electrones para completar su capa.", answer: 8, type: 'config' },
+            { clue: "Configuración: 1s² 2s² 2p 3s¹. Un electrón en su última capa.", answer: 11, type: 'config' },
+            { clue: "Configuración: 1s² 2s² 2p. Tiene su capa de valencia completa.", answer: 10, type: 'config' },
+            { clue: "Configuración: 1s² 2s² 2p. Le faltan 2 electrones para completar su capa.", answer: 8, type: 'config' },
             { clue: "Configuración: 1s². Solo tiene 2 electrones.", answer: 2, type: 'config' },
-            { clue: "Configuración: 1s² 2s² 2p⁶ 3s² 3p⁶. Último gas noble del período 3.", answer: 18, type: 'config' },
-            { clue: "Configuración: 1s² 2s² 2p⁶ 3s² 3p⁵. Halógeno del período 3.", answer: 17, type: 'config' },
+            { clue: "Configuración: 1s² 2s² 2p 3s² 3p. Último gas noble del período 3.", answer: 18, type: 'config' },
+            { clue: "Configuración: 1s² 2s² 2p 3s² 3p. Halógeno del período 3.", answer: 17, type: 'config' },
             { clue: "Configuración: 1s² 2s² 2p². Tiene 4 electrones de valencia.", answer: 6, type: 'config' },
-            { clue: "Configuración: 1s² 2s² 2p⁶ 3s² 3p³. No metal del grupo 15, período 3.", answer: 15, type: 'config' },
+            { clue: "Configuración: 1s² 2s² 2p 3s² 3p³. No metal del grupo 15, período 3.", answer: 15, type: 'config' },
             { clue: "Configuración: 1s² 2s¹. Metal alcalino del período 2.", answer: 3, type: 'config' },
-            { clue: "Configuración: 1s² 2s² 2p⁶ 3s² 3p⁶ 4s². Último elemento del período 4 que cubrimos.", answer: 20, type: 'config' }
+            { clue: "Configuración: 1s² 2s² 2p 3s² 3p 4s². Último elemento del período 4 que cubrimos.", answer: 20, type: 'config' }
         ];
 
         function generateDistractors(correctZ, count) {
@@ -652,7 +710,6 @@
             container.innerHTML = '';
             const nucDiv = document.createElement('div');
             nucDiv.className = 'mini-nucleus';
-            // simplified nucleons - show up to 6 protons and neutrons for visual
             const showP = Math.min(z, 6), showN = Math.min(z, 6);
             const phi2 = Math.PI * (3 - Math.sqrt(5));
             const parts2 = [];
@@ -672,7 +729,6 @@
                 nuc.style.top = `${30 + y - 3}px`;
                 container.appendChild(nuc);
             });
-            // Shells
             let remE = z, lvls = [];
             [2, 8, 8, 2].forEach((m) => { let f = Math.min(m, remE); lvls.push(f); remE -= f; });
             const radii = [12, 20, 28, 35];
@@ -698,7 +754,8 @@
         }
 
         function startGuessing() {
-            currentMode = 'guess'; guessScore = 0; guessIndex = 0; guessLocked = false;
+            currentMode = 'guess';
+            guessScore = 0; guessIndex = 0; guessLocked = false;
             clearInterval(timerInterval);
             document.getElementById('mission-panel').style.display = 'none';
             document.getElementById('builder-section').style.display = 'none';
@@ -745,7 +802,6 @@
                     clearInterval(guessTimerInterval);
                     SoundManager.fail();
                     guessLocked = true;
-                    // highlight correct answer
                     highlightCorrectCard(guessMissions[guessIndex].answer);
                     setTimeout(() => { guessIndex++; loadGuessQuestion(); }, 1200);
                 }
@@ -792,51 +848,20 @@
             const mt = document.getElementById('modal-title');
             mt.innerText = '¡Adivinanza Completada!';
             mt.style.color = 'var(--correct)';
-
             const mm = document.getElementById('modal-msg');
             mm.style.display = 'block';
             document.getElementById('final-score').innerText = guessScore;
 
             const ls = document.getElementById('leaderboard-section');
             ls.style.display = 'block';
-
             const rb = document.getElementById('replay-btn');
             rb.innerText = 'Jugar de Nuevo';
             rb.onclick = () => { closeModal(); startGuessing(); };
-
             if (guessScore > 0) {
                 saveGuessScore(guessScore);
             } else {
                 showLeaderboard(true);
             }
-        }
-
-        function saveGuessScore(ns) {
-            setTimeout(() => {
-                let name = prompt("¡Récord Adivinanza! Tu nombre (max 10 letras):") || "Anónimo";
-                let scores = JSON.parse(localStorage.getItem('quimicaGuessScores') || '[]');
-                scores.push({ name: name.substring(0, 10), score: ns });
-                scores.sort((a, b) => b.score - a.score);
-                localStorage.setItem('quimicaGuessScores', JSON.stringify(scores.slice(0, 5)));
-                activeLeaderboardTab = 'adivinar';
-                showLeaderboard(true);
-            }, 100);
-        }
-
-        function switchLeaderboardTab(tab) {
-            activeLeaderboardTab = tab;
-            document.getElementById('tab-competir').style.background = tab === 'competir' ? 'var(--correct)' : '#414868';
-            document.getElementById('tab-competir').style.color = tab === 'competir' ? '#1a1b26' : 'var(--text-color)';
-            document.getElementById('tab-adivinar').style.background = tab === 'adivinar' ? '#ff9e64' : '#414868';
-            document.getElementById('tab-adivinar').style.color = tab === 'adivinar' ? '#1a1b26' : 'var(--text-color)';
-            const key = tab === 'competir' ? 'quimicaScores' : 'quimicaGuessScores';
-            const subtitle = tab === 'competir' ? 'TOP 5 CIENTÍFICOS' : 'TOP 5 ADIVINADORES';
-            document.getElementById('leaderboard-subtitle').innerText = subtitle;
-            const b = document.getElementById('leaderboard-body');
-            b.innerHTML = '';
-            let s = JSON.parse(localStorage.getItem(key) || '[]');
-            if (s.length === 0) b.innerHTML = '<tr><td colspan="3">Sin récords aún.</td></tr>';
-            else s.forEach((d, i) => b.innerHTML += `<tr><td>${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}</td><td>${d.name}</td><td>${d.score}</td></tr>`);
         }
 
         window.onload = () => { attachHoldListeners(); updateBuilderUI(); requestAnimationFrame(animate); };
