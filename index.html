@@ -635,7 +635,7 @@
             b.innerHTML = '<tr><td colspan="3">Cargando datos espaciales...</td></tr>';
             
             try {
-                const q = query(collection(db, collectionName), orderBy("score", "desc"), limit(5));
+                const q = query(collection(db, collectionName), orderBy("score", "desc"), limit(100));
                 const querySnapshot = await getDocs(q);
                 let s = [];
                 querySnapshot.forEach((doc) => { s.push(doc.data()); });
