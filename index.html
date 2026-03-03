@@ -154,10 +154,11 @@
 
         /* --- MODAL --- */
         #modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; padding: 20px; }
-        .modal-content { background: var(--panel-bg); padding: 25px; border-radius: 16px; text-align: center; max-width: 450px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 2px solid #7aa2f7;}
-        .leaderboard-table { width: 100%; margin-top: 15px; border-collapse: collapse; }
+        .modal-content { background: var(--panel-bg); padding: 25px; border-radius: 16px; text-align: center; max-width: 650px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 2px solid #7aa2f7; max-height: 90vh; overflow: hidden; }
+        .leaderboard-scroll { max-height: 420px; overflow-y: auto; border-radius: 10px; padding-right: 8px; } /* contenedor scroll */
+        .leaderboard-table { width: 100%; margin-top: 15px; border-collapse: collapse; display: table; }
         .leaderboard-table th, .leaderboard-table td { padding: 10px; border-bottom: 1px solid #414868; text-align: center; font-size: 0.95rem;}
-        .leaderboard-table th { color: var(--noble); text-transform: uppercase; font-size: 0.85rem; }
+        .leaderboard-table th { color: var(--noble); text-transform: uppercase; font-size: 0.85rem; position: sticky; top: 0; background: rgba(36,40,59,0.9); z-index: 2; }
         .modal-btn { margin-top: 15px; width: 100%; padding: 12px; font-size: 1.1rem; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; background: #414868; color: var(--text-color); }
 
         /* --- SECCIÓN ADIVINANZA --- */
@@ -197,6 +198,7 @@
             .mission-stats > div { font-size: 1rem; }
             .guess-options { grid-template-columns: repeat(2, 1fr); gap: 10px; }
             .guess-stats { flex-wrap: wrap; gap: 8px; justify-content: center; }
+            .modal-content { padding: 15px; }
         }
     </style>
 </head>
@@ -326,11 +328,13 @@
                     <button id="tab-competir" class="modal-btn" onclick="switchLeaderboardTab('competir')" style="margin-top:0;flex:1;padding:8px;font-size:0.85rem;background:var(--correct);color:#1a1b26;">Competir</button>
                     <button id="tab-adivinar" class="modal-btn" onclick="switchLeaderboardTab('adivinar')" style="margin-top:0;flex:1;padding:8px;font-size:0.85rem;">Adivinar</button>
                 </div>
-                <h3 id="leaderboard-subtitle" style="color:var(--noble); margin-bottom:10px; font-size:1rem; letter-spacing:1px;">TOP 5 CIENTÍFICOS</h3>
-                <table class="leaderboard-table">
-                    <thead><tr><th>#</th><th>Nombre</th><th>Pts</th></tr></thead>
-                    <tbody id="leaderboard-body"></tbody>
-                </table>
+                <h3 id="leaderboard-subtitle" style="color:var(--noble); margin-bottom:10px; font-size:1rem; letter-spacing:1px;">🏆 TOP 50 CIENTÍFICOS</h3>
+                <div class="leaderboard-scroll">
+                    <table class="leaderboard-table">
+                        <thead><tr><th>#</th><th>Nombre</th><th>Pts</th></tr></thead>
+                        <tbody id="leaderboard-body"></tbody>
+                    </table>
+                </div>
             </div>
             
             <div style="display:flex; gap:10px; margin-top:20px;">
@@ -496,6 +500,8 @@
         function setupMissionUI(title, showScoreTime, showHint) {
             document.getElementById('mission-panel').style.display = 'block';
             document.getElementById('mission-title-text').innerText = title;
+            document.getElementById('score-container').style.display = show-scoreTime ? 'block' : 'none';
+            // note: show-scoreTime variable name corrected to showScoreTime
             document.getElementById('score-container').style.display = showScoreTime ? 'block' : 'none';
             document.getElementById('time-container').style.display = showScoreTime ? 'block' : 'none';
             document.getElementById('hint-btn').style.display = showHint ? 'block' : 'none';
@@ -622,30 +628,77 @@
         // --- LECTURA DE PUNTAJES DE FIREBASE ---
         async function switchLeaderboardTab(tab) {
             activeLeaderboardTab = tab;
-            document.getElementById('tab-competir').style.background = tab === 'competir' ? 'var(--correct)' : '#414868';
-            document.getElementById('tab-competir').style.color = tab === 'competir' ? '#1a1b26' : 'var(--text-color)';
-            document.getElementById('tab-adivinar').style.background = tab === 'adivinar' ? '#ff9e64' : '#414868';
-            document.getElementById('tab-adivinar').style.color = tab === 'adivinar' ? '#1a1b26' : 'var(--text-color)';
-            
-            const collectionName = tab === 'competir' ? 'scores_competir' : 'scores_adivinar';
-            const subtitle = tab === 'competir' ? 'TOP 5 CIENTÍFICOS' : 'TOP 5 ADIVINADORES';
+
+            // Estilo botones tabs
+            document.getElementById('tab-competir').style.background =
+                tab === 'competir' ? 'var(--correct)' : '#414868';
+            document.getElementById('tab-competir').style.color =
+                tab === 'competir' ? '#1a1b26' : 'var(--text-color)';
+
+            document.getElementById('tab-adivinar').style.background =
+                tab === 'adivinar' ? '#ff9e64' : '#414868';
+            document.getElementById('tab-adivinar').style.color =
+                tab === 'adivinar' ? '#1a1b26' : 'var(--text-color)';
+
+            const collectionName =
+                tab === 'competir' ? 'scores_competir' : 'scores_adivinar';
+
+            const subtitle =
+                tab === 'competir'
+                    ? '🏆 TOP 50 CIENTÍFICOS'
+                    : '🔬 TOP 50 ADIVINADORES';
+
             document.getElementById('leaderboard-subtitle').innerText = subtitle;
-            const b = document.getElementById('leaderboard-body');
-            
-            b.innerHTML = '<tr><td colspan="3">Cargando datos espaciales...</td></tr>';
-            
+
+            const body = document.getElementById('leaderboard-body');
+            body.innerHTML =
+                '<tr><td colspan="3">Cargando datos del laboratorio...</td></tr>';
+
             try {
-                const q = query(collection(db, collectionName), orderBy("score", "desc"), limit(5));
+                const q = query(
+                    collection(db, collectionName),
+                    orderBy("score", "desc"),
+                    limit(50)
+                );
+
                 const querySnapshot = await getDocs(q);
-                let s = [];
-                querySnapshot.forEach((doc) => { s.push(doc.data()); });
-                
-                b.innerHTML = '';
-                if (s.length === 0) b.innerHTML = '<tr><td colspan="3">Sin récords aún. ¡Sé el primero!</td></tr>';
-                else s.forEach((d, i) => b.innerHTML += `<tr><td>${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}</td><td>${d.name}</td><td>${d.score}</td></tr>`);
-            } catch(e) {
+
+                let scores = [];
+                querySnapshot.forEach((doc) => {
+                    scores.push(doc.data());
+                });
+
+                body.innerHTML = '';
+
+                if (scores.length === 0) {
+                    body.innerHTML =
+                        '<tr><td colspan="3">Sin récords aún. ¡Sé el primero!</td></tr>';
+                    return;
+                }
+
+                scores.forEach((data, index) => {
+                    let position = index + 1;
+                    let medal = '';
+
+                    if (position === 1) medal = '🥇';
+                    else if (position === 2) medal = '🥈';
+                    else if (position === 3) medal = '🥉';
+
+                    const isTop3 = position <= 3;
+
+                    body.innerHTML += `
+                        <tr style="${isTop3 ? 'font-weight:bold; font-size:1.05rem;' : ''}">
+                            <td>${medal ? medal : position}</td>
+                            <td>${data.name}</td>
+                            <td>${data.score}</td>
+                        </tr>
+                    `;
+                });
+
+            } catch (e) {
                 console.error("Error obteniendo ranking:", e);
-                b.innerHTML = '<tr><td colspan="3">Error conectando al laboratorio central.</td></tr>';
+                body.innerHTML =
+                    '<tr><td colspan="3">Error conectando al laboratorio central.</td></tr>';
             }
         }
 
