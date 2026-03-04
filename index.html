@@ -7,56 +7,57 @@
     <title>QuimicaQuest Móvil SJ</title>
     <style>
         /* Efecto de Cristal (Glassmorphism) para los paneles */
-.builder-controls, .builder-data, #mission-panel, #guess-panel {
-    background: rgba(36, 40, 59, 0.7) !important;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5) !important;
-}
+        .builder-controls, .builder-data, #mission-panel, #guess-panel {
+            background: rgba(36, 40, 59, 0.7) !important;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5) !important;
+        }
 
-/* Mejora de los botones */
-.controls button {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-    padding: 10px !important;
-    border-radius: 12px !important;
-    text-transform: uppercase;
-    font-size: 0.75rem !important;
-    letter-spacing: 1px;
-    border-bottom: 4px solid rgba(0,0,0,0.2) !important; /* Efecto 3D */
-}
+        /* Mejora de los botones */
+        .controls button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            padding: 10px !important;
+            border-radius: 12px !important;
+            text-transform: uppercase;
+            font-size: 0.75rem !important;
+            letter-spacing: 1px;
+            border-bottom: 4px solid rgba(0,0,0,0.2) !important;
+        }
 
-.controls button i {
-    font-size: 1.2rem;
-}
+        .controls button i {
+            font-size: 1.2rem;
+        }
 
-/* Animación de entrada para el visor del átomo */
-.canvas-box {
-    border: 2px solid var(--metal);
-    background: radial-gradient(circle, #1a1b26 0%, #0f101a 100%) !important;
-}
+        /* Animación de entrada para el visor del átomo */
+        .canvas-box {
+            border: 2px solid var(--metal);
+            background: radial-gradient(circle, #1a1b26 0%, #0f101a 100%) !important;
+        }
 
-/* Mejora de los contadores de partículas */
-.btn-hold {
-    border-radius: 50% !important; /* Botones redondos */
-    box-shadow: 0 4px 0px #2a2f45;
-    transition: all 0.1s;
-}
+        /* Mejora de los contadores de partículas */
+        .btn-hold {
+            border-radius: 50% !important;
+            box-shadow: 0 4px 0px #2a2f45;
+            transition: all 0.1s;
+        }
 
-.btn-hold:active {
-    transform: translateY(3px);
-    box-shadow: 0 1px 0px #2a2f45;
-}
+        .btn-hold:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0px #2a2f45;
+        }
 
-/* Gradientes en las etiquetas de datos */
-.big-sym {
-    background: linear-gradient(180deg, #7aa2f7, #3d59a1);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 10px rgba(122, 162, 247, 0.5));
-}
+        /* Gradientes en las etiquetas de datos */
+        .big-sym {
+            background: linear-gradient(180deg, #7aa2f7, #3d59a1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 10px rgba(122, 162, 247, 0.5));
+        }
+        
         :root {
             --bg-color: #1a1b26;
             --panel-bg: #24283b; --text-color: #c0caf5;
@@ -152,10 +153,35 @@
         .tag.unstable { background: var(--unstable); color: #1a1b26; }
         .advice-text { color: var(--electron-color); font-size: 1rem; font-weight: 500; margin-top: 10px; display: block; line-height: 1.3;}
 
-        /* --- MODAL --- */
+        /* --- MODAL Y TABLA DE PUNTOS --- */
         #modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; padding: 20px; }
-        .modal-content { background: var(--panel-bg); padding: 25px; border-radius: 16px; text-align: center; max-width: 650px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 2px solid #7aa2f7; max-height: 90vh; overflow: hidden; }
-        .leaderboard-scroll { max-height: 420px; overflow-y: auto; border-radius: 10px; padding-right: 8px; } /* contenedor scroll */
+        .modal-content { background: var(--panel-bg); padding: 25px; border-radius: 16px; text-align: center; max-width: 650px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 2px solid #7aa2f7; max-height: 90vh; overflow: hidden; position: relative; }
+        
+        /* ESTILO DEL NUEVO BOTÓN X DE CIERRE */
+        .modal-close-x {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            color: var(--error);
+            cursor: pointer;
+            background: rgba(247, 118, 142, 0.1);
+            width: 35px;
+            height: 35px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            transition: 0.2s;
+            z-index: 10;
+        }
+        .modal-close-x:hover {
+            background: var(--error);
+            color: #1a1b26;
+            transform: scale(1.1);
+        }
+
+        .leaderboard-scroll { max-height: 420px; overflow-y: auto; border-radius: 10px; padding-right: 8px; }
         .leaderboard-table { width: 100%; margin-top: 15px; border-collapse: collapse; display: table; }
         .leaderboard-table th, .leaderboard-table td { padding: 10px; border-bottom: 1px solid #414868; text-align: center; font-size: 0.95rem;}
         .leaderboard-table th { color: var(--noble); text-transform: uppercase; font-size: 0.85rem; position: sticky; top: 0; background: rgba(36,40,59,0.9); z-index: 2; }
@@ -208,22 +234,22 @@
         <h1>QuimicaQuest Móvil SJ</h1>
         <p id="subtitle">Laboratorio Atómico de Bolsillo Química 10 SJ </p>
         <div class="controls">
-    <button onclick="switchMode('builder')" class="btn-special">
-        <i class="fas fa-flask"></i> ⚛️ Libre
-    </button>
-    <button onclick="startPractice()" style="background-color: var(--metalloid); color: #1a1b26;">
-        <i class="fas fa-graduation-cap"></i> 🛠️ Práctica
-    </button>
-    <button onclick="startMissions()" style="background-color: var(--correct); color: #1a1b26;">
-        <i class="fas fa-vial"></i> 🎯 Competir
-    </button>
-    <button onclick="startGuessing()" style="background-color: #ff9e64; color: #1a1b26;">
-        <i class="fas fa-lightbulb"></i> 🔬 Adivinar
-    </button>
-    <button onclick="showLeaderboard(false)" style="background-color: var(--noble); color: #1a1b26;">
-        <i class="fas fa-trophy"></i> 🏆 Récords
-    </button>
-</div>
+            <button onclick="switchMode('builder')" class="btn-special">
+                <i class="fas fa-flask"></i> ⚛️ Libre
+            </button>
+            <button onclick="startPractice()" style="background-color: var(--metalloid); color: #1a1b26;">
+                <i class="fas fa-graduation-cap"></i> 🛠️ Práctica
+            </button>
+            <button onclick="startMissions()" style="background-color: var(--correct); color: #1a1b26;">
+                <i class="fas fa-vial"></i> 🎯 Competir
+            </button>
+            <button onclick="startGuessing()" style="background-color: #ff9e64; color: #1a1b26;">
+                <i class="fas fa-lightbulb"></i> 🔬 Adivinar
+            </button>
+            <button onclick="showLeaderboard(false)" style="background-color: var(--noble); color: #1a1b26;">
+                <i class="fas fa-trophy"></i> 🏆 Récords
+            </button>
+        </div>
     </header>
 
     <div id="mission-panel">
@@ -314,12 +340,13 @@
                 <strong>Configuración Electrónica:</strong>
                 <div id="b-config" style="font-family: 'Courier New', monospace; color:var(--electron-color); margin-top:8px; font-size:1.2rem; font-weight:bold;">1s<sup>1</sup></div>
             </div>
-           
         </div>
     </div>
 
     <div id="modal-overlay">
         <div class="modal-content">
+            <div class="modal-close-x" onclick="closeModal()" title="Cerrar panel"><i class="fas fa-times"></i></div>
+            
             <h2 id="modal-title" style="color:var(--correct); margin-top:0; font-size:1.8rem;">¡Terminado!</h2>
             <p id="modal-msg" style="display:none; font-size:1.2rem;">Puntos: <strong id="final-score" style="font-size:1.6rem; color:var(--correct);">0</strong></p>
             
@@ -345,7 +372,6 @@
     </div>
 
     <script type="module">
-        // --- CONFIGURACIÓN E IMPORTACIONES FIREBASE ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
         import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
@@ -364,7 +390,6 @@
         const analytics = getAnalytics(app);
         const db = getFirestore(app);
 
-        // --- EXPOSICIÓN GLOBAL (NECESARIO PARA BOTONES EN HTML) ---
         window.switchMode = switchMode;
         window.startPractice = startPractice;
         window.startMissions = startMissions;
@@ -375,7 +400,6 @@
         window.setNeutral = setNeutral;
         window.showHint = showHint;
 
-        // --- GESTIÓN DE AUDIO ---
         let audioCtx = null;
         function initAudio() { if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } }
         function playTone(freq, type, time, duration, vol = 0.1) {
@@ -392,7 +416,6 @@
             fail: () => { initAudio(); playTone(300,'triangle',0,0.2,0.2); playTone(250,'triangle',0.2,0.4,0.2); }
         };
 
-        // --- DATOS ---
         const elementsBasic = [null,["H","Hidrógeno"],["He","Helio"],["Li","Litio"],["Be","Berilio"],["B","Boro"],["C","Carbono"],["N","Nitrógeno"],["O","Oxígeno"],["F","Flúor"],["Ne","Neón"],["Na","Sodio"],["Mg","Magnesio"],["Al","Aluminio"],["Si","Silicio"],["P","Fósforo"],["S","Azufre"],["Cl","Cloro"],["Ar","Argón"],["K","Potasio"],["Ca","Calcio"]];
         const isotopeDB = {
             1:{0:["S"],1:["S"],2:["R"]}, 2:{1:["S"],2:["S"],4:["R"]}, 3:{3:["S"],4:["S"],5:["R"]},
@@ -419,7 +442,6 @@
             { text: "Práctica: Helio-4 neutro.", target: { p: 2, n: 2, e: 2 }, hint: "Z=2 (Helio). Masa 4 (2p+2n)." }
         ];
 
-        // --- ESTADO GLOBAL ---
         let b_p = 1, b_n = 0, b_e = 1;
         let activeElectrons = [], animationTime = 0;
         let gameMissions = [], currentMissionIndex = 0, score = 0, timeLeft = 60, timerInterval;
@@ -428,7 +450,6 @@
         let guessTimerInterval, guessTimeLeft = 40, guessMissions = [], guessIndex = 0, guessScore = 0, guessLocked = false;
         let activeLeaderboardTab = 'competir';
 
-        // --- INICIALIZACIÓN Y EVENTOS ---
         document.addEventListener('click', () => initAudio(), { once: true });
         document.addEventListener('touchstart', () => initAudio(), { once: true }); 
 
@@ -457,7 +478,6 @@
                 clearInterval(pressTimer);
                 isPressing = false; pressTimer = null;
             };
-            
             btn.addEventListener('mousedown', start);
             btn.addEventListener('touchstart', start, {passive: false});
             btn.addEventListener('mouseup', stop);
@@ -466,7 +486,6 @@
             btn.addEventListener('touchcancel', stop);
         }
 
-        // --- LÓGICA DEL JUEGO ---
         function switchMode(mode) {
             currentMode = mode;
             clearInterval(timerInterval); clearInterval(guessTimerInterval);
@@ -500,8 +519,6 @@
         function setupMissionUI(title, showScoreTime, showHint) {
             document.getElementById('mission-panel').style.display = 'block';
             document.getElementById('mission-title-text').innerText = title;
-            document.getElementById('score-container').style.display = show-scoreTime ? 'block' : 'none';
-            // note: show-scoreTime variable name corrected to showScoreTime
             document.getElementById('score-container').style.display = showScoreTime ? 'block' : 'none';
             document.getElementById('time-container').style.display = showScoreTime ? 'block' : 'none';
             document.getElementById('hint-btn').style.display = showHint ? 'block' : 'none';
@@ -577,7 +594,6 @@
             }
         }
 
-        // --- GUARDADO DE PUNTAJES EN FIREBASE ---
         async function saveScore(ns) {
             if(ns<=0) return;
             setTimeout(async () => {
@@ -625,11 +641,9 @@
         function showModal() { document.getElementById('modal-overlay').style.display='flex'; }
         function closeModal() { document.getElementById('modal-overlay').style.display='none'; document.getElementById('replay-btn').style.display='block'; }
 
-        // --- LECTURA DE PUNTAJES DE FIREBASE ---
         async function switchLeaderboardTab(tab) {
             activeLeaderboardTab = tab;
 
-            // Estilo botones tabs
             document.getElementById('tab-competir').style.background =
                 tab === 'competir' ? 'var(--correct)' : '#414868';
             document.getElementById('tab-competir').style.color =
@@ -651,8 +665,7 @@
             document.getElementById('leaderboard-subtitle').innerText = subtitle;
 
             const body = document.getElementById('leaderboard-body');
-            body.innerHTML =
-                '<tr><td colspan="3">Cargando datos del laboratorio...</td></tr>';
+            body.innerHTML = '<tr><td colspan="3">Cargando datos del laboratorio...</td></tr>';
 
             try {
                 const q = query(
@@ -662,7 +675,6 @@
                 );
 
                 const querySnapshot = await getDocs(q);
-
                 let scores = [];
                 querySnapshot.forEach((doc) => {
                     scores.push(doc.data());
@@ -671,8 +683,7 @@
                 body.innerHTML = '';
 
                 if (scores.length === 0) {
-                    body.innerHTML =
-                        '<tr><td colspan="3">Sin récords aún. ¡Sé el primero!</td></tr>';
+                    body.innerHTML = '<tr><td colspan="3">Sin récords aún. ¡Sé el primero!</td></tr>';
                     return;
                 }
 
@@ -697,12 +708,10 @@
 
             } catch (e) {
                 console.error("Error obteniendo ranking:", e);
-                body.innerHTML =
-                    '<tr><td colspan="3">Error conectando al laboratorio central.</td></tr>';
+                body.innerHTML = '<tr><td colspan="3">Error conectando al laboratorio central.</td></tr>';
             }
         }
 
-        // --- LÓGICA CONSTRUCTOR ---
         function updateBuilder(t, d) {
             initAudio();
             if(t==='p') b_p=Math.max(1, Math.min(20, b_p+d));
@@ -779,7 +788,6 @@
             requestAnimationFrame(animate);
         }
 
-        // --- ADIVINANZA ATÓMICA ---
         const allGuessMissions = [
             { clue: "Z = 1. Es el elemento más ligero del universo.", answer: 1, type: 'z' },
             { clue: "Z = 6. Base fundamental de la química orgánica.", answer: 6, type: 'z' },
