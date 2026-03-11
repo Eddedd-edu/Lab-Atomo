@@ -92,6 +92,19 @@
         .controls button:active { transform: scale(0.96); }
         button.btn-special { background-color: #e0af68; }
 
+        /* --- EFECTO DE DESTELLO VERDE (SUCCESS FLASH) --- */
+        #flash-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(115, 218, 202, 0);
+            z-index: 9999; pointer-events: none; opacity: 0;
+        }
+        .flash-active { animation: successFlash 0.6s ease-out forwards; }
+        @keyframes successFlash {
+            0% { opacity: 0; background-color: rgba(255, 255, 255, 0.8); }
+            15% { opacity: 1; background-color: rgba(115, 218, 202, 0.5); }
+            100% { opacity: 0; background-color: rgba(115, 218, 202, 0); }
+        }
+
         /* --- PANEL DE MISIONES --- */
         #mission-panel { display: none; width: 100%; max-width: 800px; background: #1a1b26; border: 2px solid var(--correct); padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         .mission-title { color: var(--correct); font-size: 1.1rem; margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 1px; }
@@ -154,32 +167,16 @@
         .advice-text { color: var(--electron-color); font-size: 1rem; font-weight: 500; margin-top: 10px; display: block; line-height: 1.3;}
 
         /* --- MODAL Y TABLA DE PUNTOS --- */
-        #modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; padding: 20px; }
+        #modal-overlay, #login-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; padding: 20px; }
         .modal-content { background: var(--panel-bg); padding: 25px; border-radius: 16px; text-align: center; max-width: 650px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 2px solid #7aa2f7; max-height: 90vh; overflow: hidden; position: relative; }
         
-        /* ESTILO DEL NUEVO BOTÓN X DE CIERRE */
         .modal-close-x {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            font-size: 1.5rem;
-            color: var(--error);
-            cursor: pointer;
-            background: rgba(247, 118, 142, 0.1);
-            width: 35px;
-            height: 35px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 50%;
-            transition: 0.2s;
-            z-index: 10;
+            position: absolute; top: 15px; right: 15px; font-size: 1.5rem; color: var(--error);
+            cursor: pointer; background: rgba(247, 118, 142, 0.1); width: 35px; height: 35px;
+            display: flex; justify-content: center; align-items: center; border-radius: 50%;
+            transition: 0.2s; z-index: 10;
         }
-        .modal-close-x:hover {
-            background: var(--error);
-            color: #1a1b26;
-            transform: scale(1.1);
-        }
+        .modal-close-x:hover { background: var(--error); color: #1a1b26; transform: scale(1.1); }
 
         .leaderboard-scroll { max-height: 420px; overflow-y: auto; border-radius: 10px; padding-right: 8px; }
         .leaderboard-table { width: 100%; margin-top: 15px; border-collapse: collapse; display: table; }
@@ -209,7 +206,7 @@
         .guess-card.wrong-flash { border-color: var(--error); background: rgba(247,118,142,0.15); }
 
         /* =========================================
-           OPTIMIZACIÓN PARA MÓVILES (MEDIA QUERY)
+            OPTIMIZACIÓN PARA MÓVILES (MEDIA QUERY)
         ========================================= */
         @media (max-width: 900px) {
             body { padding: 10px; }
@@ -230,6 +227,8 @@
 </head>
 <body>
 
+    <div id="flash-overlay"></div>
+
     <header>
         <h1>QuimicaQuest Móvil SJ</h1>
         <p id="subtitle">Laboratorio Atómico de Bolsillo Química 10 SJ </p>
@@ -240,10 +239,10 @@
             <button onclick="startPractice()" style="background-color: var(--metalloid); color: #1a1b26;">
                 <i class="fas fa-graduation-cap"></i> 🛠️ Práctica
             </button>
-            <button onclick="startMissions()" style="background-color: var(--correct); color: #1a1b26;">
+            <button onclick="checkAuthAndStart('timed')" style="background-color: var(--correct); color: #1a1b26;">
                 <i class="fas fa-vial"></i> 🎯 Competir
             </button>
-            <button onclick="startGuessing()" style="background-color: #ff9e64; color: #1a1b26;">
+            <button onclick="checkAuthAndStart('guess')" style="background-color: #ff9e64; color: #1a1b26;">
                 <i class="fas fa-lightbulb"></i> 🔬 Adivinar
             </button>
             <button onclick="showLeaderboard(false)" style="background-color: var(--noble); color: #1a1b26;">
@@ -252,13 +251,24 @@
         </div>
     </header>
 
+    <div id="login-overlay">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-close-x" onclick="document.getElementById('login-overlay').style.display='none'"><i class="fas fa-times"></i></div>
+            <h2 style="color:var(--accent); margin-top:0;">Acceso Estudiante</h2>
+            <p style="font-size:0.9rem; color:#a9b1d6; margin-bottom:15px;">Ingresa tu código ZipGrade para registrar tus puntajes.</p>
+            <input type="number" id="zip-input" placeholder="Tu Código" style="width:100%; padding:12px; border-radius:8px; border:none; background:#14151f; color:#fff; font-size:1.1rem; text-align:center; margin-bottom:15px; outline:none;">
+            <button class="modal-btn" id="btn-login" style="background:var(--correct); color:#1a1b26;" onclick="validateZip()">Verificar e Iniciar</button>
+            <div id="login-error" style="color:var(--error); margin-top:10px; font-weight:bold; font-size:0.9rem;"></div>
+        </div>
+    </div>
+
     <div id="mission-panel">
         <h3 class="mission-title" id="mission-title-text">Misión</h3>
         <p class="mission-text" id="mission-desc">-</p>
         <div class="mission-stats">
             <div>Prog: <span id="mission-tracker" style="color:var(--noble)">0/5</span></div>
             <div id="score-container">Pts: <span id="score-display" style="color:var(--correct)">0</span></div>
-            <div id="time-container"> <span id="time-display" style="color:var(--warning)">60</span>s</div>
+            <div id="time-container"> <span id="time-display" style="color:var(--warning)">420</span>s</div>
             <button id="hint-btn" onclick="showHint()" style="display:none; background-color: var(--electron-color); color: #1a1b26; padding: 8px 12px; border:none; border-radius:6px; font-weight:bold; font-size:0.9rem;"> Pista</button>
         </div>
         <p id="hint-text"></p>
@@ -269,7 +279,7 @@
         <div class="guess-stats">
             <div>Misión: <span id="guess-tracker" style="color:var(--noble)">1/5</span></div>
             <div>Pts: <span id="guess-score-display" style="color:var(--correct)">0</span></div>
-            <div> <span id="guess-time-display" style="color:var(--warning)">40</span>s</div>
+            <div> <span id="guess-time-display" style="color:var(--warning)">420</span>s</div>
         </div>
         <div class="guess-clue" id="guess-clue-text">-</div>
         <div class="guess-options" id="guess-options-container"></div>
@@ -374,7 +384,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
-        import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCw4JnCCFHVogAEXncodxi9jnwigO7qUIA",
@@ -390,6 +400,21 @@
         const analytics = getAnalytics(app);
         const db = getFirestore(app);
 
+        // Variables Globales y Control de Oportunidades
+        let currentStudentName = "";
+        let pendingMode = ""; // 'timed' o 'guess'
+        let hasPlayedCompetir = false; 
+        let hasPlayedAdivinar = false;
+
+        let b_p = 1, b_n = 0, b_e = 1;
+        let activeElectrons = [], animationTime = 0;
+        let gameMissions = [], currentMissionIndex = 0, score = 0, timeLeft = 420, timerInterval;
+        let currentMode = 'builder';
+        let pressTimer = null, isPressing = false;
+        let guessTimerInterval, guessTimeLeft = 420, guessMissions = [], guessIndex = 0, guessScore = 0, guessLocked = false;
+        let activeLeaderboardTab = 'competir';
+
+        // Exposiciones Globales
         window.switchMode = switchMode;
         window.startPractice = startPractice;
         window.startMissions = startMissions;
@@ -399,7 +424,10 @@
         window.closeModal = closeModal;
         window.setNeutral = setNeutral;
         window.showHint = showHint;
+        window.checkAuthAndStart = checkAuthAndStart;
+        window.validateZip = validateZip;
 
+        // Sonidos
         let audioCtx = null;
         function initAudio() { if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } }
         function playTone(freq, type, time, duration, vol = 0.1) {
@@ -416,6 +444,72 @@
             fail: () => { initAudio(); playTone(300,'triangle',0,0.2,0.2); playTone(250,'triangle',0.2,0.4,0.2); }
         };
 
+        // Función para el destello visual verde
+        function triggerSuccessFlash() {
+            const flash = document.getElementById('flash-overlay');
+            flash.classList.remove('flash-active');
+            void flash.offsetWidth; // Reinicia la animación
+            flash.classList.add('flash-active');
+        }
+
+        // --- SISTEMA DE VALIDACIÓN DE ZIPGRADE CON RESTRICCIÓN DE INTENTOS ---
+        function checkAuthAndStart(mode) {
+            if (mode === 'timed' && hasPlayedCompetir) {
+                alert("Ya has utilizado tu única oportunidad en la Misión Competitiva.");
+                return;
+            }
+            if (mode === 'guess' && hasPlayedAdivinar) {
+                alert("Ya has utilizado tu única oportunidad en Adivinar.");
+                return;
+            }
+
+            if (currentStudentName) {
+                if (mode === 'timed') startMissions();
+                else if (mode === 'guess') startGuessing();
+            } else {
+                pendingMode = mode;
+                document.getElementById('login-overlay').style.display = 'flex';
+                document.getElementById('login-error').innerText = '';
+                document.getElementById('zip-input').value = '';
+            }
+        }
+
+        async function validateZip() {
+            const zip = document.getElementById('zip-input').value.trim();
+            const err = document.getElementById('login-error');
+            const btn = document.getElementById('btn-login');
+            
+            if(!zip) { err.innerText = "Ingresa tu código ZipGrade."; return; }
+            
+            btn.disabled = true; btn.innerText = "Verificando..."; err.innerText = "";
+
+            try {
+                const docSnap = await getDoc(doc(db, "estudiantes", zip));
+                if(docSnap.exists()) {
+                    const data = docSnap.data();
+                    currentStudentName = data.nombre || `${data["First Name"] || ''} ${data["Last Name"] || ''}`.trim() || "Estudiante";
+                    
+                    document.getElementById('login-overlay').style.display = 'none';
+                    
+                    if (pendingMode === 'timed') {
+                        if (hasPlayedCompetir) { alert("Ya has utilizado tu única oportunidad en Competir."); switchMode('builder'); }
+                        else startMissions();
+                    } else if (pendingMode === 'guess') {
+                        if (hasPlayedAdivinar) { alert("Ya has utilizado tu única oportunidad en Adivinar."); switchMode('builder'); }
+                        else startGuessing();
+                    }
+                } else {
+                    err.innerText = "Código no encontrado. Verifica tu ZipGrade.";
+                }
+            } catch(e) {
+                err.innerText = "Error de conexión con Firebase."; console.error(e);
+            } finally {
+                btn.disabled = false; btn.innerText = "Verificar e Iniciar";
+            }
+        }
+
+
+        // Datos Básicos Químicos
         const elementsBasic = [null,["H","Hidrógeno"],["He","Helio"],["Li","Litio"],["Be","Berilio"],["B","Boro"],["C","Carbono"],["N","Nitrógeno"],["O","Oxígeno"],["F","Flúor"],["Ne","Neón"],["Na","Sodio"],["Mg","Magnesio"],["Al","Aluminio"],["Si","Silicio"],["P","Fósforo"],["S","Azufre"],["Cl","Cloro"],["Ar","Argón"],["K","Potasio"],["Ca","Calcio"]];
         const isotopeDB = {
             1:{0:["S"],1:["S"],2:["R"]}, 2:{1:["S"],2:["S"],4:["R"]}, 3:{3:["S"],4:["S"],5:["R"]},
@@ -441,14 +535,6 @@
             { text: "Práctica: Crea Deuterio (H-2 neutro).", target: { p: 1, n: 1, e: 1 }, hint: "Masa 2 = 1 protón + 1 neutrón." },
             { text: "Práctica: Helio-4 neutro.", target: { p: 2, n: 2, e: 2 }, hint: "Z=2 (Helio). Masa 4 (2p+2n)." }
         ];
-
-        let b_p = 1, b_n = 0, b_e = 1;
-        let activeElectrons = [], animationTime = 0;
-        let gameMissions = [], currentMissionIndex = 0, score = 0, timeLeft = 60, timerInterval;
-        let currentMode = 'builder';
-        let pressTimer = null, isPressing = false;
-        let guessTimerInterval, guessTimeLeft = 40, guessMissions = [], guessIndex = 0, guessScore = 0, guessLocked = false;
-        let activeLeaderboardTab = 'competir';
 
         document.addEventListener('click', () => initAudio(), { once: true });
         document.addEventListener('touchstart', () => initAudio(), { once: true }); 
@@ -495,14 +581,18 @@
         }
 
         function startMissions() {
+            hasPlayedCompetir = true;
             currentMode = 'timed';
             score = 0; currentMissionIndex = 0;
             clearInterval(guessTimerInterval);
             document.getElementById('guess-panel').style.display = 'none';
             document.getElementById('builder-section').style.display = 'flex';
             gameMissions = [...allMissions].sort(()=>0.5-Math.random()).slice(0,5);
-            setupMissionUI("Misión Competitiva", true, false);
-            resetBuilder(); loadNextMission();
+            setupMissionUI(`Misión Competitiva - ${currentStudentName}`, true, false);
+            resetBuilder(); 
+            timeLeft = 420; // 7 Minutos globales
+            startTimer();
+            loadNextMission();
         }
 
         function startPractice() {
@@ -533,7 +623,6 @@
             if(currentMissionIndex < gameMissions.length) {
                 document.getElementById('mission-desc').innerText = gameMissions[currentMissionIndex].text;
                 document.getElementById('mission-tracker').innerText = `${currentMissionIndex+1}/5`;
-                if(currentMode === 'timed') startTimer();
             } else { endGame(true); }
         }
 
@@ -544,9 +633,18 @@
 
         function startTimer() {
             clearInterval(timerInterval);
-            timeLeft=60; updateTimerUI();
-            timerInterval = setInterval(()=>{ timeLeft--; updateTimerUI(); if(timeLeft<=0){clearInterval(timerInterval); SoundManager.fail(); currentMissionIndex++; setTimeout(()=>loadNextMission(), 500);} }, 1000);
+            updateTimerUI();
+            timerInterval = setInterval(()=>{ 
+                timeLeft--; 
+                updateTimerUI(); 
+                if(timeLeft<=0){
+                    clearInterval(timerInterval); 
+                    SoundManager.fail(); 
+                    endGame(false); 
+                } 
+            }, 1000);
         }
+        
         function updateTimerUI() {
             const t = document.getElementById('time-display');
             t.innerText=timeLeft;
@@ -557,10 +655,14 @@
             if(currentMode==='builder' || currentMissionIndex>=gameMissions.length) return;
             const t = gameMissions[currentMissionIndex].target;
             if(b_p===t.p && b_n===t.n && b_e===t.e) {
-                clearInterval(timerInterval);
                 document.getElementById('mission-panel').style.borderColor = "#e0af68";
+                
                 if(currentMode==='timed') { score += (100 + timeLeft*10); document.getElementById('score-display').innerText = score; }
+                
+                // DESTELLO Y SONIDO DE ÉXITO
+                triggerSuccessFlash();
                 (currentMissionIndex===gameMissions.length-1 ? SoundManager.victory : SoundManager.success)();
+                
                 setTimeout(()=>{
                     document.getElementById('mission-panel').style.borderColor = "var(--correct)";
                     currentMissionIndex++; loadNextMission();
@@ -584,47 +686,41 @@
             if(isTimed) {
                 mm.style.display='block';
                 document.getElementById('final-score').innerText=score;
-                ls.style.display='block'; rb.innerText="Jugar de Nuevo"; rb.onclick=()=>{closeModal();startMissions();};
+                ls.style.display='block'; 
+                rb.style.display='none'; // Solo una oportunidad, ocultamos jugar de nuevo
                 activeLeaderboardTab = 'competir';
                 saveScore(score);
             } else {
                 mm.style.display='none'; ls.style.display='none';
+                rb.style.display='block';
                 rb.innerText="Practicar de Nuevo"; rb.onclick=()=>{closeModal();startPractice();};
                 showModal();
             }
         }
 
         async function saveScore(ns) {
-            if(ns<=0) return;
-            setTimeout(async () => {
-                let name = prompt("¡Récord! Tu nombre (max 10 letras):") || "Anónimo";
-                name = name.substring(0, 10);
-                try {
-                    await addDoc(collection(db, "scores_competir"), {
-                        name: name,
-                        score: ns,
-                        timestamp: new Date()
-                    });
-                    showLeaderboard(true);
-                } catch(e) { console.error("Error guardando score:", e); }
-            }, 100);
+            if(ns<=0) { showLeaderboard(true); return; }
+            try {
+                await addDoc(collection(db, "scores_competir"), {
+                    name: currentStudentName.substring(0, 20),
+                    score: ns,
+                    timestamp: new Date()
+                });
+                showLeaderboard(true);
+            } catch(e) { console.error("Error guardando score:", e); }
         }
 
         async function saveGuessScore(ns) {
-            if(ns<=0) return;
-            setTimeout(async () => {
-                let name = prompt("¡Récord Adivinanza! Tu nombre (max 10 letras):") || "Anónimo";
-                name = name.substring(0, 10);
-                try {
-                    await addDoc(collection(db, "scores_adivinar"), {
-                        name: name,
-                        score: ns,
-                        timestamp: new Date()
-                    });
-                    activeLeaderboardTab = 'adivinar';
-                    showLeaderboard(true);
-                } catch(e) { console.error("Error guardando score adivinanza:", e); }
-            }, 100);
+            if(ns<=0) { showLeaderboard(true); return; }
+            try {
+                await addDoc(collection(db, "scores_adivinar"), {
+                    name: currentStudentName.substring(0, 20),
+                    score: ns,
+                    timestamp: new Date()
+                });
+                activeLeaderboardTab = 'adivinar';
+                showLeaderboard(true);
+            } catch(e) { console.error("Error guardando score adivinanza:", e); }
         }
 
         function showLeaderboard(fromGame) {
@@ -644,42 +740,24 @@
         async function switchLeaderboardTab(tab) {
             activeLeaderboardTab = tab;
 
-            document.getElementById('tab-competir').style.background =
-                tab === 'competir' ? 'var(--correct)' : '#414868';
-            document.getElementById('tab-competir').style.color =
-                tab === 'competir' ? '#1a1b26' : 'var(--text-color)';
+            document.getElementById('tab-competir').style.background = tab === 'competir' ? 'var(--correct)' : '#414868';
+            document.getElementById('tab-competir').style.color = tab === 'competir' ? '#1a1b26' : 'var(--text-color)';
 
-            document.getElementById('tab-adivinar').style.background =
-                tab === 'adivinar' ? '#ff9e64' : '#414868';
-            document.getElementById('tab-adivinar').style.color =
-                tab === 'adivinar' ? '#1a1b26' : 'var(--text-color)';
+            document.getElementById('tab-adivinar').style.background = tab === 'adivinar' ? '#ff9e64' : '#414868';
+            document.getElementById('tab-adivinar').style.color = tab === 'adivinar' ? '#1a1b26' : 'var(--text-color)';
 
-            const collectionName =
-                tab === 'competir' ? 'scores_competir' : 'scores_adivinar';
-
-            const subtitle =
-                tab === 'competir'
-                    ? '🏆 TOP 50 CIENTÍFICOS'
-                    : '🔬 TOP 50 ADIVINADORES';
+            const collectionName = tab === 'competir' ? 'scores_competir' : 'scores_adivinar';
+            const subtitle = tab === 'competir' ? '🏆 TOP 50 CIENTÍFICOS' : '🔬 TOP 50 ADIVINADORES';
 
             document.getElementById('leaderboard-subtitle').innerText = subtitle;
-
             const body = document.getElementById('leaderboard-body');
             body.innerHTML = '<tr><td colspan="3">Cargando datos del laboratorio...</td></tr>';
 
             try {
-                const q = query(
-                    collection(db, collectionName),
-                    orderBy("score", "desc"),
-                    limit(50)
-                );
-
+                const q = query(collection(db, collectionName), orderBy("score", "desc"), limit(50));
                 const querySnapshot = await getDocs(q);
                 let scores = [];
-                querySnapshot.forEach((doc) => {
-                    scores.push(doc.data());
-                });
-
+                querySnapshot.forEach((doc) => { scores.push(doc.data()); });
                 body.innerHTML = '';
 
                 if (scores.length === 0) {
@@ -690,13 +768,11 @@
                 scores.forEach((data, index) => {
                     let position = index + 1;
                     let medal = '';
-
                     if (position === 1) medal = '🥇';
                     else if (position === 2) medal = '🥈';
                     else if (position === 3) medal = '🥉';
 
                     const isTop3 = position <= 3;
-
                     body.innerHTML += `
                         <tr style="${isTop3 ? 'font-weight:bold; font-size:1.05rem;' : ''}">
                             <td>${medal ? medal : position}</td>
@@ -705,7 +781,6 @@
                         </tr>
                     `;
                 });
-
             } catch (e) {
                 console.error("Error obteniendo ranking:", e);
                 body.innerHTML = '<tr><td colspan="3">Error conectando al laboratorio central.</td></tr>';
@@ -878,13 +953,17 @@
         }
 
         function startGuessing() {
+            hasPlayedAdivinar = true;
             currentMode = 'guess';
             guessScore = 0; guessIndex = 0; guessLocked = false;
             clearInterval(timerInterval);
             document.getElementById('mission-panel').style.display = 'none';
             document.getElementById('builder-section').style.display = 'none';
             document.getElementById('guess-panel').style.display = 'block';
+            document.getElementById('guess-title-text').innerText = `Adivinanza Atómica - ${currentStudentName}`;
             guessMissions = [...allGuessMissions].sort(() => 0.5 - Math.random()).slice(0, 5);
+            guessTimeLeft = 420; // 7 minutos globales
+            startGuessTimer();
             loadGuessQuestion();
         }
 
@@ -912,12 +991,10 @@
                 optionsContainer.appendChild(card);
                 drawMiniAtom(card.querySelector('.card-mini-atom'), z);
             });
-            startGuessTimer();
         }
 
         function startGuessTimer() {
             clearInterval(guessTimerInterval);
-            guessTimeLeft = 40;
             updateGuessTimerUI();
             guessTimerInterval = setInterval(() => {
                 guessTimeLeft--;
@@ -926,8 +1003,7 @@
                     clearInterval(guessTimerInterval);
                     SoundManager.fail();
                     guessLocked = true;
-                    highlightCorrectCard(guessMissions[guessIndex].answer);
-                    setTimeout(() => { guessIndex++; loadGuessQuestion(); }, 1200);
+                    endGuessGame(); // Finaliza cuando se agotan los 7 minutos
                 }
             }, 1000);
         }
@@ -949,8 +1025,10 @@
         function handleGuessChoice(chosen, correct, card) {
             if (guessLocked) return;
             guessLocked = true;
-            clearInterval(guessTimerInterval);
+            
             if (chosen === correct) {
+                // DESTELLO Y SONIDO DE ÉXITO
+                triggerSuccessFlash();
                 SoundManager.success();
                 card.classList.add('correct-flash');
                 guessScore += (100 + guessTimeLeft * 5);
@@ -979,13 +1057,10 @@
             const ls = document.getElementById('leaderboard-section');
             ls.style.display = 'block';
             const rb = document.getElementById('replay-btn');
-            rb.innerText = 'Jugar de Nuevo';
-            rb.onclick = () => { closeModal(); startGuessing(); };
-            if (guessScore > 0) {
-                saveGuessScore(guessScore);
-            } else {
-                showLeaderboard(true);
-            }
+            rb.style.display = 'none'; // Solo una oportunidad, ocultamos jugar de nuevo
+            
+            if (guessScore > 0) saveGuessScore(guessScore);
+            else showLeaderboard(true);
         }
 
         window.onload = () => { attachHoldListeners(); updateBuilderUI(); requestAnimationFrame(animate); };
