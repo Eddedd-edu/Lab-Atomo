@@ -70,32 +70,32 @@ class UIController {
 
             // Sonido de hover
             btn.addEventListener('mouseenter', () => {
-                if (window.sfx && window.sfx.hover) window.sfx.hover();
+                if (window.sfx && sfx.hover) sfx.hover();
             });
         });
 
-        // Botón estabilizar carga (uso de optional chaining por si no existe el elemento)
-        this.dom.btnNeutralize?.addEventListener('click', () => {
-            if (window.sfx && window.sfx.click) window.sfx.click();
-            if (window.labAtom) window.labAtom.neutralize();
+        // Botón estabilizar carga
+        this.dom.btnNeutralize.addEventListener('click', () => {
+            if (window.sfx && sfx.click) sfx.click();
+            labAtom.neutralize();
             this.processStateChange();
         });
 
         // Botones de Navegación (Modos de Juego)
         this.dom.navBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
-                if (window.sfx && window.sfx.click) window.sfx.click();
+                if (window.sfx && sfx.click) sfx.click();
                 
                 // Actualizar estado visual de los botones
                 this.dom.navBtns.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 
                 const mode = btn.dataset.mode;
-                if (window.gameManager) window.gameManager.switchMode(mode);
+                if (window.gameManager) gameManager.switchMode(mode);
             });
             
             btn.addEventListener('mouseenter', () => {
-                if (window.sfx && window.sfx.hover) window.sfx.hover();
+                if (window.sfx && sfx.hover) sfx.hover();
             });
         });
     }
@@ -135,17 +135,14 @@ class UIController {
      * Modifica la partícula solicitada, reproduce sonido y actualiza el ecosistema.
      */
     modifyParticle(type, delta) {
-        // Verificar que el átomo de laboratorio existe
-        if (!window.labAtom) return;
-
         // Sonidos diferenciados por tipo de acción
         if (window.sfx) {
-            if (delta > 0 && window.sfx.addParticle) window.sfx.addParticle();
-            else if (delta < 0 && window.sfx.removeParticle) window.sfx.removeParticle();
+            if (delta > 0 && sfx.addParticle) sfx.addParticle();
+            else if (delta < 0 && sfx.removeParticle) sfx.removeParticle();
         }
 
         // Actualizar modelo de dominio
-        window.labAtom.updateParticle(type, delta);
+        labAtom.updateParticle(type, delta);
         
         // Disparar cascada de actualizaciones (UI + Canvas)
         this.processStateChange();
@@ -158,13 +155,13 @@ class UIController {
         this.updateHUD();
         
         // Forzar actualización inmediata del motor gráfico expuesto globalmente
-        if (window.engine && window.labAtom) {
-            window.engine.updateStructure(window.labAtom);
+        if (window.engine) {
+            window.engine.updateStructure(labAtom);
         }
         
         // Comprobar condiciones del modo de juego actual
         if (window.gameManager) {
-            window.gameManager.checkMissionConditions();
+            gameManager.checkMissionConditions();
         }
     }
 
@@ -172,8 +169,7 @@ class UIController {
      * Extrae la telemetría de `labAtom` e inyecta los datos en el DOM (HUD).
      */
     updateHUD() {
-        if (!window.labAtom) return;
-        const data = window.labAtom.getTelemetry();
+        const data = labAtom.getTelemetry();
 
         // 1. Contadores base
         this.dom.countP.textContent = data.protons;
@@ -238,7 +234,7 @@ class UIController {
         const viewport = document.getElementById('atom-viewport');
         if (!viewport) return;
 
-        if (window.sfx && window.sfx.stabilize) window.sfx.stabilize();
+        if (window.sfx && sfx.stabilize) sfx.stabilize();
 
         const overlay = document.createElement('div');
         overlay.style.cssText = `
