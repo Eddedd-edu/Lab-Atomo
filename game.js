@@ -2,45 +2,30 @@
  * ============================================================================
  * ÁTOMOQUEST SJ v3 - MASTER GAME MANAGER (game.js)
  * ============================================================================
- * Contiene: La clase GameManager que unifica todos los módulos (UI, Engine, 
- * Audio, Missions, Effects, ApiClient) para coordinar el ciclo de vida completo 
- * de la aplicación y sus modos de juego.
  */
 
 class GameManager {
     constructor() {
-        // Estado de sesión del estudiante / operador
-        this.student = {
-            code: null,
-            name: null,
-            xp: 0,
-            level: 1
-        };
-
-        this.currentMode = 'builder'; // 'builder', 'practice', 'timed', 'guess'
-        this.pendingMode = null;      // Modo al que intentaba entrar antes de loguearse
+        this.student = { code: null, name: null, xp: 0, level: 1 };
+        this.currentMode = 'builder';
+        this.pendingMode = null;
         
-        // Estado de la partida activa
         this.score = 0;
         this.timeLeft = 0;
         this.timerInterval = null;
         this.combo = 1;
         
-        // Elementos específicos del DOM para HUDs de juego
         this.dom = {
             missionHud: document.getElementById('mission-hud'),
             missionTitle: document.getElementById('mission-title'),
             missionObjective: document.getElementById('mission-objective'),
             missionSteps: document.getElementById('mission-steps'),
             btnHint: document.getElementById('btn-hint'),
-            
-            // Temporizador y Combo
             missionTimer: document.getElementById('mission-timer'),
             timeRemaining: document.getElementById('time-remaining'),
             comboContainer: document.getElementById('combo-container'),
             comboMultiplier: document.getElementById('combo-multiplier'),
             
-            // Login Modal elements
             authCodeInput: document.getElementById('auth-code'),
             btnLogin: document.getElementById('btn-login'),
             authError: document.getElementById('auth-error'),
@@ -49,26 +34,18 @@ class GameManager {
             playerLevel: document.getElementById('player-level'),
             xpBarFill: document.getElementById('xp-bar-fill'),
 
-            // Botones de navegación superiores
             navBtns: document.querySelectorAll('.nav-btn')
         };
 
         this.init();
     }
 
-    /**
-     * Inicializa los escuchas globales y prepara el sistema.
-     */
     init() {
         this.bindEvents();
         this.loadLocalProgress();
     }
 
-    /**
-     * Enlaza eventos de autenticación y navegación superior.
-     */
     bindEvents() {
-        // Botón de login en el modal
         if (this.dom.btnLogin) {
             this.dom.btnLogin.addEventListener('click', () => this.handleLogin());
         }
@@ -78,7 +55,6 @@ class GameManager {
             });
         }
 
-        // Botón de pista en modo práctica
         if (this.dom.btnHint) {
             this.dom.btnHint.addEventListener('click', () => {
                 const mission = missions.getCurrentMission();
@@ -89,12 +65,11 @@ class GameManager {
             });
         }
 
-        // Enlazar los botones de la barra superior (nav-btn)
+        // Listener robusto para los botones superiores de navegación
         this.dom.navBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
+            btn.addEventListener('click', () => {
                 if (window.sfx && sfx.click) sfx.click();
                 
-                // Actualizar clases activas visuales
                 this.dom.navBtns.forEach(b => {
                     b.classList.remove('active');
                     b.setAttribute('aria-pressed', 'false');
@@ -108,9 +83,6 @@ class GameManager {
         });
     }
 
-    /**
-     * Carga el progreso local (XP y Nivel) desde el LocalStorage del navegador.
-     */
     loadLocalProgress() {
         try {
             const savedXP = localStorage.getItem('atomoquest_xp');
@@ -123,9 +95,6 @@ class GameManager {
         }
     }
 
-    /**
-     * Guarda la XP actual en LocalStorage.
-     */
     saveLocalProgress() {
         try {
             localStorage.setItem('atomoquest_xp', this.student.xp);
@@ -134,10 +103,6 @@ class GameManager {
         }
     }
 
-    /**
-     * Otorga XP al operador, calcula subidas de nivel y dispara efectos visuales.
-     * @param {number} amount 
-     */
     addXP(amount) {
         const oldLevel = this.student.level;
         this.student.xp += amount;
@@ -156,12 +121,8 @@ class GameManager {
         }
     }
 
-    /**
-     * Actualiza la interfaz del perfil del jugador (barra de XP y nivel).
-     */
     updatePlayerStatsUI() {
         if (!this.dom.playerProfile) return;
-
         if (this.student.name) {
             this.dom.playerProfile.classList.remove('hidden');
             this.dom.playerName.textContent = this.student.name;
@@ -177,10 +138,6 @@ class GameManager {
         }
     }
 
-    /**
-     * Cambia el modo de juego activo desde la barra de navegación superior.
-     * @param {string} mode - 'builder', 'practice', 'timed', 'guess', o 'leaderboard'
-     */
     async switchMode(mode) {
         this.stopTimer();
         this.currentMode = mode;
@@ -196,31 +153,18 @@ class GameManager {
             return;
         }
 
-        // Modos competitivos que requieren autenticación previa (ZipGrade)
+        // Modos competitivos (Supervivencia y Adivinanza) requieren código ZipGrade
         if (mode === 'timed' || mode === 'guess') {
             if (!this.student.code) {
                 this.pendingMode = mode;
                 if (window.leaderboard) leaderboard.showModal('login');
                 return;
             }
-
-            if (window.apiClient) {
-                const alreadyPlayed = await apiClient.yaJugo(this.student.code, mode);
-                if (alreadyPlayed) {
-                    alert(`El operador ${this.student.name} ya completó su intento en este modo competitivo.`);
-                    this.switchMode('builder');
-                    return;
-                }
-            }
         }
 
         this.startActiveMode(mode);
     }
 
-    /**
-     * Inicia un modo de juego tras pasar validaciones.
-     * @param {string} mode 
-     */
     startActiveMode(mode) {
         missions.startMode(mode);
 
@@ -240,9 +184,6 @@ class GameManager {
         }
     }
 
-    /**
-     * Renderiza la misión actual en el HUD inferior.
-     */
     renderMissionStep() {
         const mission = missions.getCurrentMission();
         if (!mission) {
@@ -266,9 +207,6 @@ class GameManager {
         }
     }
 
-    /**
-     * Llamado cada vez que el usuario modifica el átomo en el laboratorio.
-     */
     checkMissionConditions() {
         if (this.currentMode !== 'practice' && this.currentMode !== 'timed') return;
 
@@ -301,9 +239,6 @@ class GameManager {
         }
     }
 
-    // ==========================================
-    // MODO ADIVINANZA (GUESS)
-    // ==========================================
     startGuessModeUI() {
         let panel = document.getElementById('guess-mode-panel');
         if (!panel) {
@@ -395,9 +330,6 @@ class GameManager {
         }
     }
 
-    // ==========================================
-    // TEMPORIZADORES Y FLUJO DE PARTIDA
-    // ==========================================
     startTimer() {
         this.stopTimer();
         const startTime = Date.now();
@@ -433,14 +365,6 @@ class GameManager {
         if (window.fx) {
             window.fx.screenFlash('levelUp');
             window.fx.spawnQuantumConfetti(120);
-        }
-
-        if ((this.currentMode === 'timed' || this.currentMode === 'guess') && this.student.code && window.apiClient) {
-            try {
-                await apiClient.guardarPuntaje(this.student.code, this.student.name, this.score, this.currentMode);
-            } catch (e) {
-                console.error("No se pudo guardar el puntaje en Google Sheets:", e);
-            }
         }
 
         if (window.leaderboard) {
@@ -528,7 +452,6 @@ class GameManager {
     }
 }
 
-// Instanciar globalmente y exponer como window.gameManager
 let gameManager;
 window.addEventListener('DOMContentLoaded', () => {
     gameManager = new GameManager();
