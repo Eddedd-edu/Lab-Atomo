@@ -1,0 +1,722 @@
+/**
+ * ============================================================================
+ * ÁTOMOQUEST SJ v3 - CORE STYLES (style.css)
+ * ============================================================================
+ * Contiene: Variables CSS globales, Reset, Layout principal, Responsive y
+ * componentes base Glassmorphism.
+ */
+
+/* ==========================================================================
+   1. VARIABLES GLOBALES (PALETA SCI-FI Y MATERIAL DESIGN 3)
+   ========================================================================== */
+   :root {
+    /* Paleta Base Sci-Fi (Profundidad espacial) */
+    --space-darkest: #05050A;
+    --space-dark: #0B0B15;
+    --space-panel: rgba(18, 18, 32, 0.65);
+    --space-light: rgba(45, 45, 80, 0.4);
+    
+    /* Acentos y Neones (Estilo Iron Man HUD / No Man's Sky) */
+    --neon-blue: #00f3ff;
+    --neon-purple: #b026ff;
+    --neon-cyan: #0ff0fc;
+    --neon-pink: #ff007f;
+    --neon-green: #39ff14;
+    --neon-orange: #ff5e00;
+    --neon-yellow: #ffea00;
+
+    /* Partículas (Físicamente codificadas por color) */
+    --color-proton: #ff3366;       /* Rosa intenso / Rojo */
+    --color-neutron: #7b8cba;      /* Azul grisáceo neutro */
+    --color-electron: #00e5ff;     /* Cian brillante electromagnético */
+    
+    /* Estados y Telemetría */
+    --status-stable: #00ffa3;      /* Verde esmeralda */
+    --status-radioactive: #ffb703; /* Amarillo/Naranja ámbar */
+    --status-unstable: #ff003c;    /* Rojo alerta */
+    --status-neutral: #8e9aaf;     /* Gris espacial */
+    
+    /* Textos */
+    --text-main: #f0f4f8;
+    --text-muted: #a0abc0;
+    --text-highlight: #ffffff;
+
+    /* Efectos Glassmorphism */
+    --glass-bg: rgba(15, 15, 26, 0.55);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-border-highlight: rgba(0, 243, 255, 0.3);
+    --glass-blur: blur(20px);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+    --glass-glow: 0 0 20px rgba(0, 243, 255, 0.1);
+
+    /* Tipografía */
+    --font-display: 'Orbitron', system-ui, sans-serif;
+    --font-ui: 'Rajdhani', system-ui, sans-serif;
+    
+    /* Layout */
+    --radius-sm: 8px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --radius-pill: 50px;
+}
+
+/* ==========================================================================
+   2. RESET Y BASE
+   ========================================================================== */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background-color: var(--space-darkest);
+    color: var(--text-main);
+    font-family: var(--font-ui);
+    min-height: 100vh;
+    overflow-x: hidden;
+    /* Prevenir scroll en móviles al jugar */
+    overscroll-behavior-y: contain; 
+}
+
+/* ==========================================================================
+   3. MOTORES GRÁFICOS DE FONDO (CANVAS)
+   ========================================================================== */
+#universe-bg, 
+#hud-particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -2;
+    pointer-events: none;
+}
+
+#hud-particles {
+    z-index: -1;
+    opacity: 0.6;
+}
+
+/* ==========================================================================
+   4. ESTRUCTURA PRINCIPAL (LAYOUT)
+   ========================================================================== */
+#app-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    padding: 1rem 2rem;
+    max-width: 1800px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+/* Header Principal */
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    margin-bottom: 1.5rem;
+    border-radius: var(--radius-pill);
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logo-container i {
+    font-size: 2.5rem;
+    color: var(--neon-cyan);
+    filter: drop-shadow(0 0 10px var(--neon-cyan));
+}
+
+.titles h1 {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: var(--text-highlight);
+    text-transform: uppercase;
+}
+
+.version-tag {
+    font-family: var(--font-ui);
+    font-size: 0.8rem;
+    color: var(--neon-purple);
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+/* HUD del Jugador */
+.player-hud {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 0.5rem 1.5rem 0.5rem 0.5rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--glass-border);
+}
+
+.avatar-ring {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 15px rgba(176, 38, 255, 0.4);
+}
+
+.player-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.player-name {
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+}
+
+.xp-bar-container {
+    width: 100px;
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.xp-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--neon-cyan);
+    box-shadow: 0 0 10px var(--neon-cyan);
+    transition: width 0.5s ease-out;
+}
+
+.level-indicator {
+    font-size: 0.75rem;
+    color: var(--neon-yellow);
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   5. NAVEGACIÓN Y CONTROLES
+   ========================================================================== */
+.mode-selector {
+    display: flex;
+    gap: 0.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.4rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--glass-border);
+}
+
+.nav-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-btn:hover {
+    color: var(--text-highlight);
+    background: rgba(255,255,255,0.05);
+}
+
+.nav-btn.active {
+    background: rgba(0, 243, 255, 0.15);
+    color: var(--neon-cyan);
+    box-shadow: inset 0 0 20px rgba(0, 243, 255, 0.1), 0 0 10px rgba(0, 243, 255, 0.2);
+    border: 1px solid rgba(0, 243, 255, 0.3);
+}
+
+.mode-banner {
+    margin-bottom: 1rem;
+    padding: 1rem 1.25rem;
+    border-radius: var(--radius-lg);
+    background: rgba(0, 243, 255, 0.08);
+    border: 1px solid rgba(0, 243, 255, 0.2);
+    color: var(--text-highlight);
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.guess-mode-panel {
+    margin-bottom: 1.5rem;
+    padding: 1.5rem 2rem;
+    text-align: center;
+    align-items: center;
+    gap: 1rem;
+}
+
+.guess-panel-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--text-highlight);
+}
+
+.guess-panel-step {
+    color: var(--neon-cyan);
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+}
+
+.guess-options-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.guess-options-grid .guess-option-btn {
+    margin: 0;
+    display: inline-flex;
+    justify-content: center;
+    width: calc(50% - 0.375rem);
+    min-width: 220px;
+}
+
+/* ==========================================================================
+   6. GRID DEL JUEGO (GAMEPLAY AREA)
+   ========================================================================== */
+.gameplay-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr 320px;
+    gap: 2rem;
+    flex: 1;
+    min-height: 600px;
+}
+
+/* Componente Glassmorphism Base */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--glass-shadow);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.panel-title {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    color: var(--text-highlight);
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ==========================================================================
+   7. CONTROLES DE PARTÍCULAS (PANEL IZQUIERDO)
+   ========================================================================== */
+.particle-control-group {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    border-left: 4px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.proton-group { border-left-color: var(--color-proton); }
+.neutron-group { border-left-color: var(--color-neutron); }
+.electron-group { border-left-color: var(--color-electron); }
+
+.control-header {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+}
+
+.particle-name {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.proton-group .particle-name { color: var(--color-proton); text-shadow: 0 0 8px rgba(255,51,102,0.5); }
+.neutron-group .particle-name { color: var(--color-neutron); text-shadow: 0 0 8px rgba(123,140,186,0.5); }
+.electron-group .particle-name { color: var(--color-electron); text-shadow: 0 0 8px rgba(0,229,255,0.5); }
+
+.particle-desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.stepper-ui {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: var(--radius-pill);
+    padding: 0.4rem;
+}
+
+.stepper-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-highlight);
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.2s;
+    user-select: none;
+}
+
+.stepper-btn:hover { background: rgba(255, 255, 255, 0.15); transform: scale(1.1); }
+.stepper-btn:active { transform: scale(0.95); }
+
+.counter-display {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    font-weight: 700;
+    min-width: 60px;
+    text-align: center;
+}
+
+/* ==========================================================================
+   8. VISOR CUÁNTICO (CENTRO)
+   ========================================================================== */
+.viewport-container {
+    position: relative;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--glass-border-highlight);
+    background: radial-gradient(circle at center, rgba(11,11,21,0.2) 0%, rgba(5,5,10,0.8) 100%);
+    box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 243, 255, 0.05);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#quantum-engine {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* Overlays dentro del visor */
+.viewport-hud {
+    position: absolute;
+    padding: 1.5rem;
+    z-index: 10;
+    pointer-events: none;
+}
+.top-left { top: 0; left: 0; }
+.top-right { top: 0; right: 0; }
+
+.combo-meter {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+.combo-text { font-family: var(--font-display); font-size: 1rem; color: var(--neon-orange); letter-spacing: 2px; }
+#combo-multiplier { font-family: var(--font-display); font-size: 3rem; font-weight: 900; color: var(--neon-yellow); text-shadow: 0 0 15px var(--neon-orange); line-height: 1; }
+
+.timer-display {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px var(--neon-blue);
+    background: rgba(0,0,0,0.5);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid rgba(0, 243, 255, 0.2);
+}
+
+.feedback-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 20;
+}
+.pointer-events-none { pointer-events: none; }
+
+/* ==========================================================================
+   9. TELEMETRÍA Y DATOS (PANEL DERECHO)
+   ========================================================================== */
+.element-hologram {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 0;
+    position: relative;
+}
+
+.atomic-notation {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+}
+
+.mass-atomic-numbers {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    font-family: var(--font-display);
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.mass-number { font-size: 1.8rem; color: var(--text-main); }
+.atomic-number { font-size: 1.8rem; color: var(--color-proton); }
+
+.element-symbol {
+    font-family: var(--font-display);
+    font-size: 6rem;
+    font-weight: 900;
+    background: linear-gradient(180deg, #ffffff 0%, var(--neon-cyan) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 15px rgba(0, 243, 255, 0.4));
+    line-height: 1;
+}
+
+.charge-number {
+    position: absolute;
+    top: 0;
+    right: -40px;
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-electron);
+}
+
+.element-name {
+    margin-top: 1rem;
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--neon-cyan);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+/* Tarjetas de Estado */
+.status-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.status-card {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.status-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+}
+
+.status-value {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.status-value.stable { color: var(--status-stable); text-shadow: 0 0 10px rgba(0, 255, 163, 0.4); }
+.status-value.radioactive { color: var(--status-radioactive); text-shadow: 0 0 10px rgba(255, 183, 3, 0.4); }
+.status-value.neutral { color: var(--status-neutral); }
+
+/* Configuración Electrónica */
+.electronic-config-container {
+    background: rgba(0, 229, 255, 0.05);
+    border: 1px solid rgba(0, 229, 255, 0.2);
+    border-radius: var(--radius-md);
+    padding: 1.2rem;
+    text-align: center;
+}
+
+.config-label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--color-electron);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.8rem;
+}
+
+.config-display {
+    font-family: monospace;
+    font-size: 1.4rem;
+    color: var(--text-highlight);
+    word-spacing: 5px;
+}
+
+/* Botones Ciber-Estilo */
+.action-btn, .cyber-btn {
+    background: linear-gradient(45deg, rgba(0,243,255,0.1), rgba(176,38,255,0.2));
+    border: 1px solid var(--neon-cyan);
+    color: var(--text-highlight);
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s;
+    box-shadow: 0 0 15px rgba(0,243,255,0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.action-btn:hover, .cyber-btn:hover {
+    background: linear-gradient(45deg, rgba(0,243,255,0.3), rgba(176,38,255,0.4));
+    box-shadow: 0 0 25px rgba(0,243,255,0.4);
+    transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   10. MODALES (OVERLAYS GLOBALES)
+   ========================================================================== */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(5, 5, 10, 0.85);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+}
+
+.glass-modal {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border-highlight);
+    box-shadow: 0 0 50px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,243,255,0.1);
+    border-radius: var(--radius-lg);
+    padding: 3rem;
+    max-width: 450px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.glass-modal.large-modal {
+    max-width: 800px;
+    padding: 2rem;
+}
+
+.hidden { display: none !important; }
+
+/* ==========================================================================
+   11. RESPONSIVE DESIGN (TABLETS Y MÓVILES)
+   ========================================================================== */
+@media (max-width: 1200px) {
+    .gameplay-grid {
+        grid-template-columns: 280px 1fr 280px;
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 992px) {
+    /* Pantallas Medianas: Tablets */
+    .gameplay-grid {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto 1fr;
+    }
+    
+    #atom-viewport {
+        grid-column: 1 / -1;
+        grid-row: 1;
+        min-height: 400px;
+    }
+    
+    #builder-controls { grid-column: 1; grid-row: 2; }
+    #telemetry-panel { grid-column: 2; grid-row: 2; }
+    
+    .main-header {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Pantallas Pequeñas: Móviles */
+    #app-container { padding: 0.5rem; }
+    
+    .gameplay-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+    }
+    
+    #atom-viewport { min-height: 350px; }
+    #builder-controls { grid-column: 1; grid-row: 2; }
+    #telemetry-panel { grid-column: 1; grid-row: 3; }
+    
+    .mode-selector {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .nav-btn { font-size: 0.75rem; padding: 0.5rem 0.8rem; }
+    
+    .element-symbol { font-size: 4rem; }
+    .mass-number, .atomic-number { font-size: 1.2rem; }
+}

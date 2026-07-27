@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es" class="dark-theme">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0b0b15">
+    <meta name="description" content="ÁtomoQuest SJ v3 - Simulador Interactivo AAA de Estructura Atómica">
+    <title>ÁtomoQuest SJ v3</title>
+
+    <!-- Fuentes Tipográficas AAA (Sci-Fi & Data) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Iconografía -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Sistema de Estilos Modular -->
+    <link rel="stylesheet" href="theme.css">
+    <link rel="stylesheet" href="animations.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Motor de Fondo Espacial (Canvas) -->
+    <canvas id="universe-bg" aria-hidden="true"></canvas>
+
+    <!-- Motor de Partículas Globales HUD -->
+    <canvas id="hud-particles" aria-hidden="true"></canvas>
+
+    <!-- UI Principal -->
+    <main id="app-container">
+        
+        <!-- Header / Navegación Superior -->
+        <header class="glass-panel main-header" role="banner">
+            <div class="logo-container">
+                <i class="fas fa-atom pulse-glow"></i>
+                <div class="titles">
+                    <h1 class="glitch-text" data-text="ÁtomoQuest SJ">ÁtomoQuest SJ</h1>
+                    <span class="version-tag">v3.0.0</span>
+                </div>
+            </div>
+
+            <!-- Perfil del Jugador -->
+            <div id="player-profile" class="player-hud hidden" aria-live="polite">
+                <div class="avatar-ring">
+                    <i class="fas fa-user-astronaut"></i>
+                </div>
+                <div class="player-stats">
+                    <span id="player-name" class="player-name">Identificando...</span>
+                    <div class="xp-bar-container">
+                        <div id="xp-bar-fill" class="xp-fill"></div>
+                    </div>
+                    <span class="level-indicator">Nvl <span id="player-level">1</span></span>
+                </div>
+            </div>
+
+            <!-- Selector de Modos de Juego (Controlado por game.js mediante data-mode) -->
+            <nav class="mode-selector" aria-label="Modos de juego">
+                <button class="nav-btn active" data-mode="builder" aria-pressed="true">
+                    <i class="fas fa-flask"></i> Laboratorio
+                </button>
+                <button class="nav-btn" data-mode="practice" aria-pressed="false">
+                    <i class="fas fa-graduation-cap"></i> Práctica
+                </button>
+                <button class="nav-btn" data-mode="timed" aria-pressed="false">
+                    <i class="fas fa-stopwatch"></i> Supervivencia
+                </button>
+                <button class="nav-btn" data-mode="guess" aria-pressed="false">
+                    <i class="fas fa-lightbulb"></i> Adivinanza
+                </button>
+                <button class="nav-btn" data-mode="leaderboard" aria-pressed="false">
+                    <i class="fas fa-trophy"></i> Récords
+                </button>
+            </nav>
+        </header>
+
+        <section id="mode-banner" class="mode-banner hidden" aria-live="polite"></section>
+        <section id="guess-mode-panel" class="glass-panel guess-mode-panel hidden" role="region" aria-live="polite"></section>
+
+        <!-- Zona de Juego Central -->
+        <section id="gameplay-area" class="gameplay-grid">
+            
+            <!-- Panel Izquierdo: Controles del Constructor (HUD Izquierdo) -->
+            <aside id="builder-controls" class="glass-panel control-panel slide-in-left">
+                <h2 class="panel-title"><i class="fas fa-sliders-h"></i> Partículas</h2>
+                
+                <!-- Protones -->
+                <div class="particle-control-group proton-group">
+                    <div class="control-header">
+                        <span class="particle-name">Protones (Z)</span>
+                        <span class="particle-desc">Define el elemento</span>
+                    </div>
+                    <div class="stepper-ui">
+                        <button class="stepper-btn minus" data-particle="p" aria-label="Quitar protón"><i class="fas fa-minus"></i></button>
+                        <div class="counter-display">
+                            <span id="count-p" class="counter-value">1</span>
+                        </div>
+                        <button class="stepper-btn plus" data-particle="p" aria-label="Añadir protón"><i class="fas fa-plus"></i></button>
+                    </div>
+                </div>
+
+                <!-- Neutrones -->
+                <div class="particle-control-group neutron-group">
+                    <div class="control-header">
+                        <span class="particle-name">Neutrones (N)</span>
+                        <span class="particle-desc">Define el isótopo</span>
+                    </div>
+                    <div class="stepper-ui">
+                        <button class="stepper-btn minus" data-particle="n" aria-label="Quitar neutrón"><i class="fas fa-minus"></i></button>
+                        <div class="counter-display">
+                            <span id="count-n" class="counter-value">0</span>
+                        </div>
+                        <button class="stepper-btn plus" data-particle="n" aria-label="Añadir neutrón"><i class="fas fa-plus"></i></button>
+                    </div>
+                </div>
+
+                <!-- Electrones -->
+                <div class="particle-control-group electron-group">
+                    <div class="control-header">
+                        <span class="particle-name">Electrones (e⁻)</span>
+                        <span class="particle-desc">Define la carga</span>
+                    </div>
+                    <div class="stepper-ui">
+                        <button class="stepper-btn minus" data-particle="e" aria-label="Quitar electrón"><i class="fas fa-minus"></i></button>
+                        <div class="counter-display">
+                            <span id="count-e" class="counter-value">1</span>
+                        </div>
+                        <button class="stepper-btn plus" data-particle="e" aria-label="Añadir electrón"><i class="fas fa-plus"></i></button>
+                    </div>
+                </div>
+
+                <!-- Acciones Rápidas -->
+                <div class="quick-actions">
+                    <button id="btn-neutralize" class="action-btn">
+                        <i class="fas fa-balance-scale"></i> Estabilizar Carga
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Centro: Motor de Renderizado del Átomo -->
+            <section id="atom-viewport" class="viewport-container fade-in">
+                <!-- Data HUD Overlay -->
+                <div class="viewport-hud top-left">
+                    <div class="combo-meter hidden" id="combo-container">
+                        <span class="combo-text">COMBO</span>
+                        <span id="combo-multiplier">x1</span>
+                    </div>
+                </div>
+                <div class="viewport-hud top-right">
+                    <div id="mission-timer" class="timer-display hidden">
+                        <i class="fas fa-clock"></i> <span id="time-remaining">00:00</span>
+                    </div>
+                </div>
+                
+                <!-- Lienzo principal del motor cuántico -->
+                <canvas id="quantum-engine" aria-label="Representación visual del átomo interactivo"></canvas>
+                
+                <!-- Feedback Overlay -->
+                <div id="viewport-feedback" class="feedback-layer pointer-events-none"></div>
+            </section>
+
+            <!-- Panel Derecho: Telemetría y Datos (HUD Derecho) -->
+            <aside id="telemetry-panel" class="glass-panel data-panel slide-in-right">
+                <h2 class="panel-title"><i class="fas fa-satellite-dish"></i> Espectrometría</h2>
+                
+                <!-- Símbolo Químico Dinámico -->
+                <div class="element-hologram">
+                    <div class="atomic-notation">
+                        <div class="mass-atomic-numbers">
+                            <span id="data-a" class="mass-number">1</span>
+                            <span id="data-z" class="atomic-number">1</span>
+                        </div>
+                        <div id="data-symbol" class="element-symbol">H</div>
+                        <div id="data-charge" class="charge-number">0</div>
+                    </div>
+                    <div id="data-name" class="element-name">Hidrógeno-1</div>
+                </div>
+
+                <!-- Indicadores de Estado -->
+                <div class="status-grid">
+                    <div class="status-card" id="card-stability">
+                        <span class="status-label">Núcleo</span>
+                        <span id="status-stability" class="status-value stable">Estable</span>
+                    </div>
+                    <div class="status-card" id="card-ion">
+                        <span class="status-label">Ionización</span>
+                        <span id="status-ion" class="status-value neutral">Neutro</span>
+                    </div>
+                </div>
+
+                <!-- Configuración Electrónica -->
+                <div class="electronic-config-container">
+                    <span class="config-label">Distribución Orbital</span>
+                    <div id="electronic-config" class="config-display">1s¹</div>
+                </div>
+            </aside>
+
+        </section>
+
+        <!-- Sub-paneles de Modos Específicos -->
+        <section id="mission-hud" class="glass-panel bottom-hud hidden">
+            <div class="mission-info">
+                <h3 id="mission-title">Misión Activa</h3>
+                <p id="mission-objective" class="typing-effect">Construye un átomo de...</p>
+            </div>
+            <div class="mission-progress">
+                <div class="progress-steps" id="mission-steps"></div>
+                <button id="btn-hint" class="hint-btn"><i class="fas fa-question-circle"></i> Solicitar Pista</button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Sistema de Modales (Overlay) -->
+    <div id="modal-system" class="modal-overlay hidden" aria-modal="true" role="dialog">
+        <!-- Modal Login / ZipGrade -->
+        <div id="modal-login" class="glass-modal hidden">
+            <div class="modal-glare"></div>
+            <i class="fas fa-fingerprint modal-icon"></i>
+            <h2>Autenticación Requerida</h2>
+            <p>Ingresa tu código ZipGrade para habilitar este modo competitivo.</p>
+            <div class="input-group">
+                <input type="password" id="auth-code" placeholder="Código ZipGrade" autocomplete="off" inputmode="numeric">
+                <button id="btn-login" class="cyber-btn">Acceder</button>
+            </div>
+            <p id="auth-error" class="error-text hidden"></p>
+        </div>
+
+        <!-- Modal Leaderboard -->
+        <div id="modal-leaderboard" class="glass-modal large-modal hidden">
+            <button class="close-modal-btn"><i class="fas fa-times"></i></button>
+            <h2>Récords Globales</h2>
+            <div class="tabs">
+                <button class="tab-btn active" data-target="board-timed">Supervivencia</button>
+                <button class="tab-btn" data-target="board-guess">Adivinanza</button>
+            </div>
+            <div class="table-container">
+                <table class="cyber-table">
+                    <thead>
+                        <tr>
+                            <th>Rango</th>
+                            <th>Operador</th>
+                            <th>Puntuación</th>
+                            <th>Precisión</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        <!-- Generado dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Modal Fin de Partida / Recompensas -->
+        <div id="modal-results" class="glass-modal hidden">
+            <h2 id="result-title">Simulación Completada</h2>
+            <div class="score-display-huge">
+                <span id="final-score">0</span> XP
+            </div>
+            <div id="achievements-unlocked" class="achievements-container"></div>
+            <button id="btn-continue" class="cyber-btn full-width">Continuar</button>
+        </div>
+    </div>
+
+    <!-- Carga Modular de Scripts -->
+    <script src="config.js"></script>
+    <script src="utils.js"></script>
+    <script src="elements.js"></script>
+    <script src="audio.js"></script>
+    <script src="api.js"></script>
+    <script src="leaderboard.js"></script>
+    <script src="missions.js"></script>
+    <script src="particles.js"></script>
+    <script src="effects.js"></script>
+    <script src="atom.js"></script>
+    <script src="ui.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
