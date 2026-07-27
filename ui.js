@@ -132,7 +132,7 @@ class UIController {
         this.isHolding = false;
     }
 
-    /**
+/**
      * Modifica la partícula solicitada, reproduce sonido y actualiza el ecosistema.
      */
     modifyParticle(type, delta) {
@@ -142,10 +142,10 @@ class UIController {
             else if (delta < 0 && sfx.removeParticle) sfx.removeParticle();
         }
 
-        // Actualizar modelo de dominio
+        // 1. Actualizar el modelo de dominio (labAtom)
         labAtom.updateParticle(type, delta);
         
-        // Disparar cascada de actualizaciones
+        // 2. Disparar la cascada de actualización visual y gráfica
         this.processStateChange();
     }
 
@@ -153,11 +153,18 @@ class UIController {
      * Orquesta la actualización de UI y Motor Gráfico tras un cambio de estado.
      */
     processStateChange() {
+        // Actualiza los números y textos en el panel derecho (Z, A, Carga, Configuración)
         this.updateHUD();
-        if (window.engine) engine.updateStructure(labAtom);
         
-        // Comprobar condiciones del modo de juego actual (delegado a game.js)
-        if (window.gameManager) gameManager.checkMissionConditions();
+        // ¡ESTO ES LO QUE FALTABA! Forzar al motor QuantumEngine a redibujar el núcleo y las capas de electrones
+        if (window.engine) {
+            engine.updateStructure(labAtom);
+        }
+        
+        // Comprobar condiciones del modo de juego actual (si estás en práctica o supervivencia)
+        if (window.gameManager) {
+            gameManager.checkMissionConditions();
+        }
     }
 
     /**
