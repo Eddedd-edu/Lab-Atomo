@@ -21,7 +21,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Motor de Fondo Espacial (Canvas WebGL/2D) -->
+    <!-- Motor de Fondo Espacial (Canvas) -->
     <canvas id="universe-bg" aria-hidden="true"></canvas>
 
     <!-- Motor de Partículas Globales HUD -->
@@ -54,7 +54,7 @@
                 </div>
             </div>
 
-            <!-- Selector de Modos de Juego -->
+            <!-- Selector de Modos de Juego (Controlado por game.js mediante data-mode) -->
             <nav class="mode-selector" aria-label="Modos de juego">
                 <button class="nav-btn active" data-mode="builder" aria-pressed="true">
                     <i class="fas fa-flask"></i> Laboratorio
@@ -194,7 +194,7 @@
 
         </section>
 
-        <!-- Sub-paneles de Modos Específicos (Ocultos por defecto) -->
+        <!-- Sub-paneles de Modos Específicos -->
         <section id="mission-hud" class="glass-panel bottom-hud hidden">
             <div class="mission-info">
                 <h3 id="mission-title">Misión Activa</h3>
@@ -259,7 +259,7 @@
         </div>
     </div>
 
-    <!-- Carga Modular de Scripts (Arquitectura estricta) -->
+    <!-- Carga Modular de Scripts -->
     <script src="config.js" defer></script>
     <script src="utils.js" defer></script>
     <script src="elements.js" defer></script>
