@@ -68,7 +68,7 @@ class UIController {
                 btn.addEventListener(ev, () => this.stopHold());
             });
 
-            // Sonido de hover (asumiendo que sfx estará en audio.js)
+            // Sonido de hover
             btn.addEventListener('mouseenter', () => {
                 if (window.sfx && sfx.hover) sfx.hover();
             });
@@ -91,7 +91,6 @@ class UIController {
                 btn.classList.add('active');
                 
                 const mode = btn.dataset.mode;
-                // La lógica de cambio de modo se manejará en game.js
                 if (window.gameManager) gameManager.switchMode(mode);
             });
             
@@ -132,7 +131,7 @@ class UIController {
         this.isHolding = false;
     }
 
-/**
+    /**
      * Modifica la partícula solicitada, reproduce sonido y actualiza el ecosistema.
      */
     modifyParticle(type, delta) {
@@ -142,10 +141,10 @@ class UIController {
             else if (delta < 0 && sfx.removeParticle) sfx.removeParticle();
         }
 
-        // 1. Actualizar el modelo de dominio (labAtom)
+        // Actualizar modelo de dominio
         labAtom.updateParticle(type, delta);
         
-        // 2. Disparar la cascada de actualización visual y gráfica
+        // Disparar cascada de actualizaciones (UI + Canvas)
         this.processStateChange();
     }
 
@@ -153,15 +152,14 @@ class UIController {
      * Orquesta la actualización de UI y Motor Gráfico tras un cambio de estado.
      */
     processStateChange() {
-        // Actualiza los números y textos en el panel derecho (Z, A, Carga, Configuración)
         this.updateHUD();
         
-        // ¡ESTO ES LO QUE FALTABA! Forzar al motor QuantumEngine a redibujar el núcleo y las capas de electrones
+        // Forzar actualización inmediata del motor gráfico expuesto globalmente
         if (window.engine) {
-            engine.updateStructure(labAtom);
+            window.engine.updateStructure(labAtom);
         }
         
-        // Comprobar condiciones del modo de juego actual (si estás en práctica o supervivencia)
+        // Comprobar condiciones del modo de juego actual
         if (window.gameManager) {
             gameManager.checkMissionConditions();
         }
@@ -202,7 +200,6 @@ class UIController {
         if (data.stability === 'stable') {
             stabilityText = 'Estable';
             this.dom.statusStability.classList.add('stable');
-            // Feedback visual al lograr estabilidad
             if (this.previousStability !== 'stable') this.triggerStableGlow();
         } else if (data.stability === 'radioactive') {
             stabilityText = 'Radiactivo';
@@ -220,7 +217,7 @@ class UIController {
         let ionText = 'Neutro';
         if (data.ionType === 'cation') {
             ionText = 'Catión';
-            this.dom.statusIon.classList.add('unstable'); // Usamos rojo alerta para iones
+            this.dom.statusIon.classList.add('unstable');
         } else if (data.ionType === 'anion') {
             ionText = 'Anión';
             this.dom.statusIon.classList.add('unstable');
@@ -237,7 +234,6 @@ class UIController {
         const viewport = document.getElementById('atom-viewport');
         if (!viewport) return;
 
-        // Sonido especial de logro menor
         if (window.sfx && sfx.stabilize) sfx.stabilize();
 
         const overlay = document.createElement('div');
@@ -252,7 +248,6 @@ class UIController {
         `;
         viewport.appendChild(overlay);
 
-        // Desvanecer y remover
         requestAnimationFrame(() => {
             setTimeout(() => {
                 overlay.style.opacity = '0';
