@@ -1,0 +1,270 @@
+/**
+ * ============================================================================
+ * ÁTOMOQUEST SJ v3 - THEME & COMPONENTS (theme.css)
+ * ============================================================================
+ * Contiene: Scrollbars personalizados, Tablas cibernéticas, Formularios,
+ * Barras de progreso, Insignias (Badges) y clases utilitarias de color.
+ */
+
+/* ==========================================================================
+   1. CUSTOM SCROLLBARS (SCROLL INMERSIVO)
+   ========================================================================== */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--space-darkest);
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 243, 255, 0.3);
+    border-radius: var(--radius-pill);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--neon-cyan);
+    box-shadow: 0 0 10px var(--neon-cyan);
+}
+
+/* ==========================================================================
+   2. TABLAS CIBERNÉTICAS (LEADERBOARD)
+   ========================================================================== */
+.table-container {
+    width: 100%;
+    max-height: 400px;
+    overflow-y: auto;
+    margin-top: 1.5rem;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.cyber-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-family: var(--font-ui);
+}
+
+.cyber-table thead {
+    position: sticky;
+    top: 0;
+    background: rgba(15, 15, 26, 0.95);
+    backdrop-filter: blur(5px);
+    z-index: 10;
+}
+
+.cyber-table th {
+    padding: 1rem;
+    color: var(--neon-purple);
+    font-family: var(--font-display);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 2px solid var(--neon-cyan);
+}
+
+.cyber-table td {
+    padding: 1rem;
+    color: var(--text-main);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.2s;
+}
+
+.cyber-table tbody tr:hover td {
+    background: rgba(0, 243, 255, 0.05);
+    color: var(--text-highlight);
+}
+
+/* Resaltar el top 3 del ranking */
+.cyber-table tbody tr:nth-child(1) td {
+    color: var(--neon-yellow);
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(255, 234, 0, 0.3);
+}
+
+.cyber-table tbody tr:nth-child(2) td {
+    color: #c0c0c0; /* Plata */
+    font-weight: bold;
+}
+
+.cyber-table tbody tr:nth-child(3) td {
+    color: #cd7f32; /* Bronce */
+    font-weight: bold;
+}
+
+/* ==========================================================================
+   3. FORMULARIOS Y ENTRADAS (INPUTS)
+   ========================================================================== */
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="password"] {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.5rem;
+    color: var(--text-highlight);
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    text-align: center;
+    transition: all 0.3s;
+    outline: none;
+    letter-spacing: 2px;
+}
+
+input:focus {
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 15px rgba(0, 243, 255, 0.2), inset 0 0 10px rgba(0, 243, 255, 0.1);
+    background: rgba(0, 243, 255, 0.05);
+}
+
+input::placeholder {
+    color: rgba(255, 255, 255, 0.2);
+}
+
+.error-text {
+    color: var(--status-unstable);
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-top: -0.5rem;
+    text-shadow: 0 0 5px rgba(255, 0, 60, 0.4);
+}
+
+/* ==========================================================================
+   4. SISTEMA DE PESTAÑAS (TABS)
+   ========================================================================== */
+.tabs {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 0.5rem;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-family: var(--font-display);
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.3s;
+}
+
+.tab-btn:hover {
+    color: var(--text-main);
+}
+
+.tab-btn.active {
+    color: var(--neon-cyan);
+    font-weight: 700;
+}
+
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--neon-cyan);
+    border-radius: 3px 3px 0 0;
+    box-shadow: 0 -2px 10px var(--neon-cyan);
+}
+
+/* ==========================================================================
+   5. BARRAS DE PROGRESO Y PASOS (MISSION STEPS)
+   ========================================================================== */
+.progress-steps {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.step-indicator {
+    flex: 1;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    transition: all 0.4s ease;
+}
+
+.step-indicator.completed {
+    background: var(--neon-green);
+    box-shadow: 0 0 10px var(--neon-green);
+}
+
+.step-indicator.active {
+    background: var(--neon-cyan);
+    box-shadow: 0 0 10px var(--neon-cyan);
+    animation: pulseGlow 2s infinite alternate;
+}
+
+/* ==========================================================================
+   6. UTILIDADES Y CLASES AUXILIARES (HELPERS)
+   ========================================================================== */
+/* Cajas de icono */
+.icon-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-icon {
+    font-size: 3rem;
+    color: var(--neon-cyan);
+    margin-bottom: 1rem;
+    filter: drop-shadow(0 0 15px rgba(0, 243, 255, 0.3));
+}
+
+/* Botones de cierre (Close) */
+.close-modal-btn {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.close-modal-btn:hover {
+    color: var(--status-unstable);
+    transform: rotate(90deg) scale(1.2);
+}
+
+/* Textos Especiales */
+.score-display-huge {
+    font-family: var(--font-display);
+    font-size: 4rem;
+    font-weight: 900;
+    color: var(--neon-yellow);
+    text-shadow: 0 0 20px rgba(255, 234, 0, 0.5);
+    margin: 2rem 0;
+}
+
+/* Contenedores de botones (Full Width) */
+.full-width {
+    width: 100%;
+}
