@@ -40,9 +40,6 @@ class GameManager {
             comboContainer: document.getElementById('combo-container'),
             comboMultiplier: document.getElementById('combo-multiplier'),
             
-            // Paneles de juego interactivo alternativos (Adivinanza)
-            guessPanel: null, // Se puede inyectar o manejar por DOM directo
-            
             // Login Modal elements
             authCodeInput: document.getElementById('auth-code'),
             btnLogin: document.getElementById('btn-login'),
@@ -50,7 +47,10 @@ class GameManager {
             playerProfile: document.getElementById('player-profile'),
             playerName: document.getElementById('player-name'),
             playerLevel: document.getElementById('player-level'),
-            xpBarFill: document.getElementById('xp-bar-fill')
+            xpBarFill: document.getElementById('xp-bar-fill'),
+
+            // Botones de navegación superiores
+            navBtns: document.querySelectorAll('.nav-btn')
         };
 
         this.init();
@@ -65,7 +65,7 @@ class GameManager {
     }
 
     /**
-     * Enlaza eventos de autenticación y controles de misiones.
+     * Enlaza eventos de autenticación y navegación superior.
      */
     bindEvents() {
         // Botón de login en el modal
@@ -88,6 +88,24 @@ class GameManager {
                 }
             });
         }
+
+        // Enlazar los botones de la barra superior (nav-btn)
+        this.dom.navBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (window.sfx && sfx.click) sfx.click();
+                
+                // Actualizar clases activas visuales
+                this.dom.navBtns.forEach(b => {
+                    b.classList.remove('active');
+                    b.setAttribute('aria-pressed', 'false');
+                });
+                btn.classList.add('active');
+                btn.setAttribute('aria-pressed', 'true');
+
+                const mode = btn.dataset.mode;
+                this.switchMode(mode);
+            });
+        });
     }
 
     /**
@@ -128,7 +146,6 @@ class GameManager {
         this.saveLocalProgress();
         this.updatePlayerStatsUI();
 
-        // Si subió de nivel, celebrar por todo lo alto
         if (this.student.level > oldLevel) {
             if (window.sfx && sfx.levelUp) sfx.levelUp();
             if (window.fx) {
@@ -150,7 +167,6 @@ class GameManager {
             this.dom.playerName.textContent = this.student.name;
             this.dom.playerLevel.textContent = this.student.level;
 
-            // Calcular porcentaje para la barra de XP
             const currentLevelXP = LEVELS_DB.calculateNextLevelXP(this.student.level - 1);
             const nextLevelXP = LEVELS_DB.calculateNextLevelXP(this.student.level);
             const progress = ((this.student.xp - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100;
@@ -171,7 +187,6 @@ class GameManager {
         this.hideAllGameHUDs();
 
         if (mode === 'builder') {
-            // Laboratorio libre
             this.resetToBuilder();
             return;
         }
@@ -181,7 +196,7 @@ class GameManager {
             return;
         }
 
-        // Modos que requieren autenticación previa (ZipGrade)
+        // Modos competitivos que requieren autenticación previa (ZipGrade)
         if (mode === 'timed' || mode === 'guess') {
             if (!this.student.code) {
                 this.pendingMode = mode;
@@ -189,7 +204,6 @@ class GameManager {
                 return;
             }
 
-            // Comprobar si ya jugó en la nube
             if (window.apiClient) {
                 const alreadyPlayed = await apiClient.yaJugo(this.student.code, mode);
                 if (alreadyPlayed) {
@@ -200,7 +214,6 @@ class GameManager {
             }
         }
 
-        // Inicializar el modo seleccionado
         this.startActiveMode(mode);
     }
 
@@ -219,11 +232,10 @@ class GameManager {
                 this.timeLeft = GAME_CONFIG.TIMERS.SURVIVAL_BASE;
                 this.startTimer();
             } else {
-                this.dom.btnHint.style.display = 'inline-block';
+                if (this.dom.btnHint) this.dom.btnHint.style.display = 'inline-block';
             }
             this.renderMissionStep();
         } else if (mode === 'guess') {
-            // Mostrar interfaz de adivinanza (creada dinámicamente o gestionada)
             this.startGuessModeUI();
         }
     }
@@ -238,10 +250,9 @@ class GameManager {
             return;
         }
 
-        this.dom.missionTitle.textContent = mission.title || `Misión ${missions.currentIndex + 1}`;
-        this.dom.missionObjective.textContent = mission.text;
+        if (this.dom.missionTitle) this.dom.missionTitle.textContent = mission.title || `Misión ${missions.currentIndex + 1}`;
+        if (this.dom.missionObjective) this.dom.missionObjective.textContent = mission.text;
 
-        // Renderizar barritas de progreso
         const progress = missions.getProgress();
         let stepsHtml = '';
         for (let i = 0; i < progress.total; i++) {
@@ -256,21 +267,19 @@ class GameManager {
     }
 
     /**
-     * Llamado desde ui.js cada vez que el usuario modifica el átomo en el laboratorio.
+     * Llamado cada vez que el usuario modifica el átomo en el laboratorio.
      */
     checkMissionConditions() {
         if (this.currentMode !== 'practice' && this.currentMode !== 'timed') return;
 
         const isCorrect = missions.validateAtomBuild(labAtom);
         if (isCorrect) {
-            // ¡Misión cumplida!
             if (window.sfx && sfx.success) sfx.success();
             if (window.fx) {
                 window.fx.screenFlash('success');
                 window.fx.floatingText('+100 XP', { x: window.innerWidth / 2, y: window.innerHeight / 2 }, 'xp');
             }
 
-            // Calcular Puntos y XP
             const basePoints = GAME_CONFIG.SCORING.BASE_POINTS;
             const timeBonus = this.currentMode === 'timed' ? this.timeLeft * GAME_CONFIG.SCORING.TIME_BONUS_MULTIPLIER : 0;
             const earnedPoints = Math.round((basePoints + timeBonus) * this.combo);
@@ -278,18 +287,15 @@ class GameManager {
             this.score += earnedPoints;
             this.addXP(earnedPoints);
 
-            // Incrementar combo en modo survival
             if (this.currentMode === 'timed') {
                 this.combo = Math.min(GAME_CONFIG.SCORING.MAX_COMBO, this.combo + GAME_CONFIG.SCORING.COMBO_STEP);
                 if (this.dom.comboMultiplier) this.dom.comboMultiplier.textContent = `x${this.combo}`;
             }
 
-            // Avanzar a la siguiente misión
             const hasMore = missions.advanceMission();
             if (!hasMore) {
                 this.handleGameVictory();
             } else {
-                // Breve pausa y cargar siguiente
                 setTimeout(() => this.renderMissionStep(), 600);
             }
         }
@@ -299,14 +305,13 @@ class GameManager {
     // MODO ADIVINANZA (GUESS)
     // ==========================================
     startGuessModeUI() {
-        // Crear un panel flotante dinámico para adivinanzas si no existe
         let panel = document.getElementById('guess-mode-panel');
         if (!panel) {
             panel = document.createElement('div');
             panel.id = 'guess-mode-panel';
             panel.className = 'glass-panel slide-in-bottom';
             panel.style.cssText = `
-                position: absolute; top: 100px; left: 50%; transform: translateX(-50%);
+                position: absolute; top: 120px; left: 50%; transform: translateX(-50%);
                 width: 90%; max-width: 600px; z-index: 50; text-align: center; padding: 2rem;
             `;
             document.getElementById('app-container').appendChild(panel);
@@ -344,9 +349,8 @@ class GameManager {
             </div>
         `;
 
-        // Asignar eventos a los botones de opción
         panel.querySelectorAll('.guess-option-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+            btn.addEventListener('click', () => {
                 const selectedZ = parseInt(btn.dataset.z, 10);
                 this.handleGuessSubmission(selectedZ, btn);
             });
@@ -431,7 +435,6 @@ class GameManager {
             window.fx.spawnQuantumConfetti(120);
         }
 
-        // Guardar puntaje en la nube si está logueado en modo competitivo
         if ((this.currentMode === 'timed' || this.currentMode === 'guess') && this.student.code && window.apiClient) {
             try {
                 await apiClient.guardarPuntaje(this.student.code, this.student.name, this.score, this.currentMode);
@@ -453,9 +456,6 @@ class GameManager {
         this.resetToBuilder();
     }
 
-    /**
-     * Autenticación del estudiante mediante código ZipGrade.
-     */
     async handleLogin() {
         const code = this.dom.authCodeInput ? this.dom.authCodeInput.value.trim() : '';
         if (!code) return;
@@ -480,7 +480,6 @@ class GameManager {
 
                 if (window.sfx && sfx.success) sfx.success();
 
-                // Reanudar el modo pendiente que intentaba abrir
                 if (this.pendingMode) {
                     const modeToStart = this.pendingMode;
                     this.pendingMode = null;
@@ -518,10 +517,13 @@ class GameManager {
         this.combo = 1;
         this.hideAllGameHUDs();
         
-        // Sincronizar botones de navegación en la UI
-        document.querySelectorAll('.nav-btn').forEach(btn => {
+        this.dom.navBtns.forEach(btn => {
             btn.classList.remove('active');
-            if (btn.dataset.mode === 'builder') btn.classList.add('active');
+            btn.setAttribute('aria-pressed', 'false');
+            if (btn.dataset.mode === 'builder') {
+                btn.classList.add('active');
+                btn.setAttribute('aria-pressed', 'true');
+            }
         });
     }
 }
