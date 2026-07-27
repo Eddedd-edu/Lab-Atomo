@@ -127,18 +127,25 @@ class QuantumEngine {
         const dpr = window.devicePixelRatio || 1;
         const rect = this.canvas.parentElement.getBoundingClientRect();
         
+        // Dimensiones lógicas (CSS)
         this.width = rect.width;
         this.height = rect.height;
         this.centerX = this.width / 2;
         this.centerY = this.height / 2;
 
+        // Dimensiones reales del canvas (píxeles físicos)
         this.canvas.width = this.width * dpr;
         this.canvas.height = this.height * dpr;
-        
+
+        // Resetear la transformación para evitar acumulación de escalas
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        // Aplicar la escala de DPR una sola vez
         this.ctx.scale(dpr, dpr);
     }
 
     updateStructure(atomState) {
+        if (!atomState) return; // Seguridad extra
+
         this.nucleons = [];
         const totalNucleons = atomState.protons + atomState.neutrons;
         let pCount = 0;
@@ -187,6 +194,7 @@ class QuantumEngine {
     loop() {
         this.time += 0.016;
         
+        // Limpiar con dimensiones lógicas (la escala de DPR ya está aplicada)
         this.ctx.clearRect(0, 0, this.width, this.height);
 
         if (this.nucleons.length > 0) {
@@ -208,9 +216,12 @@ class QuantumEngine {
     }
 }
 
-// Exponer explícitamente la instancia global como window.engine
-let engine;
+// Instanciar el motor al cargar el DOM, usando window.labAtom de forma segura
 window.addEventListener('DOMContentLoaded', () => {
-    window.engine = new QuantumEngine('quantum-engine');
-    window.engine.updateStructure(labAtom);
+    if (window.labAtom) {
+        window.engine = new QuantumEngine('quantum-engine');
+        window.engine.updateStructure(window.labAtom);
+    } else {
+        console.warn('labAtom no está disponible al inicializar QuantumEngine');
+    }
 });
